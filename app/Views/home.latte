@@ -3,6 +3,29 @@
 {varType string $title}
 
 {block content}
-    <h1 class="mt-5">{$title} 👋</h1>
-    <p>{localize("strings.welcome")}</p>
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto text-center bg-gray-100 rounded-lg shadow-md p-8">
+            <h1 class="text-4xl font-bold mb-6 text-blue-600">{$title} 🔐</h1>
+            
+            <div class="mb-6">
+                <p class="text-xl text-gray-700 mb-4">
+                    {localize("strings.welcome")}
+                </p>
+                
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded">
+                    <p class="text-yellow-700">
+                        <strong>🚧 Password Manager in Construction</strong><br>
+                        This application is currently under development.<br>
+                        Please check back later for a fully functional secure password manager.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <a href="#" class="bg-blue-500 hover:bg-blue-600 text-black font-bold py-2 px-4 rounded inline-block">
+                    Stay Tuned
+                </a>
+            </div>
+        </div>
+    </div>
 {/block}

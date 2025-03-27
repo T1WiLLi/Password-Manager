@@ -2,7 +2,7 @@ services:
   webserver:
     build:
       context: "./docker/services/php"
-    container_name: "zephyrus_webserver"
+    container_name: "pm-web"
     restart: 'always'
     ports:
       - "80:80"
