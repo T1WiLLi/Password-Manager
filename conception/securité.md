@@ -13,10 +13,6 @@
 - ## **Cryptage des données**:
     L'application à pour but d'enregistrer des mots de passes de manière extrêmement sécurisé. De ce fait, les mots de passe enregistrer dans l'application devront être encrypter, nous pouvons utiliser AES-256 pour cela avec un chiffrement symétrique, avec comme mode d'opération CBC. Étant donner que nous allons gérer plusieurs utilisateur et dans un but de sécurité, la clé d'encryption vas découler du mot de passe de l'utilisateur qui représente la clé. Cela nous permet de ne pas stocker la clé d'encryption en base de données.
 
-- ## **Remember me**: 
-    L'option "remember me" est toujours difficile à implémenter, car elle peut potentiellement compromettre la sécurité de l'application. Une technique pour implémenter cette option est de stocker la clé d'encryption de l'utilisateur comme sujet d'un token JWE (JSON Web Encryption) dans un cookie HTTP-Only, secure et avec une durée de vie limitée (example: 72h)
-    La raison pour laquelle nous utilisons un JWE plutôt qu'un JWS (JSON Web Signature) est que nous avons besoin de chiffrer les données, et pas simplement de les signer. Car la clé d'encryption doit rester confidentiel.
-
 - ## **Mise à jour de la clé d'encryption**:
     Lorsque l'utilisateur change son mot de passe, la clé d'encryption doit être mise à jour. Nous pouvons utiliser un algorithme de hachage comme SHA-256 pour hacher le mot de passe, puis utiliser le résultat comme clé d'encryption. Cela nous permet de mettre à jour la clé d'encryption sans avoir à stocker la clé d'encryption en base de données. Il nous faudra également décrypter les données enregistrées avec la clé d'encryption précédente, puis les re-
     crypter avec la nouvelle clé d'encryption. Cela nous permet de garantir que les données sont toujours sécurisées. De plus, le JWE devra être mis à jour avec la nouvelle clé d'encryption.
