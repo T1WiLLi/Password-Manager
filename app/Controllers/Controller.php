@@ -1,4 +1,6 @@
-<?php namespace Controllers;
+<?php
+
+namespace Controllers;
 
 use Models\Core\Entities\Now;
 use Zephyrus\Application\Controller as BaseController;
@@ -70,8 +72,13 @@ abstract class Controller extends BaseController
         $csp = new ContentSecurityPolicy();
         $csp->setFontSources(["'self'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com']);
         $csp->setStyleSources(["'self'", 'https://fonts.googleapis.com', ContentSecurityPolicy::UNSAFE_INLINE]);
-        $csp->setScriptSources(["'self'", 'https://ajax.googleapis.com', 'https://maps.googleapis.com',
-            'https://www.google-analytics.com', 'https://cdn.jsdelivr.net']);
+        $csp->setScriptSources([
+            "'self'",
+            'https://ajax.googleapis.com',
+            'https://maps.googleapis.com',
+            'https://www.google-analytics.com',
+            'https://cdn.jsdelivr.net'
+        ]);
         $csp->setChildSources(["'self'"]);
         $csp->setWorkerSources(["blob:"]);
         $csp->setConnectSources(["'self'", 'https://api.mapbox.com', 'https://events.mapbox.com']);

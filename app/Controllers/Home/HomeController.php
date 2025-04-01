@@ -1,4 +1,6 @@
-<?php namespace Controllers\Home;
+<?php
+
+namespace Controllers\Home;
 
 use Controllers\Controller;
 use Zephyrus\Network\Response;
