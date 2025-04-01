@@ -2,7 +2,9 @@
 
 namespace App\Models\Entities;
 
-class LoginAttempts
+use Models\Core\Entity;
+
+class LoginAttempts extends Entity
 {
     public $id;
     public $user_id;

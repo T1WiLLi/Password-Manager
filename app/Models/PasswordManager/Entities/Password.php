@@ -2,7 +2,9 @@
 
 namespace App\Models\Entities;
 
-class Password
+use Models\Core\Entity;
+
+class Password extends Entity
 {
     public $id;
     public $user_id;

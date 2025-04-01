@@ -2,7 +2,9 @@
 
 namespace App\Models\Entities;
 
-class User
+use Models\Core\Entity;
+
+class User extends Entity
 {
     public $id;
     public $username;

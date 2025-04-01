@@ -2,7 +2,9 @@
 
 namespace App\Models\Entities;
 
-class PasswordSharing
+use Models\Core\Entity;
+
+class PasswordSharing extends Entity
 {
     public $id;
     public $password_id;

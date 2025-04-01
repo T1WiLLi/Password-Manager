@@ -2,7 +2,9 @@
 
 namespace App\Models\Entities;
 
-class EmailVerification
+use Models\Core\Entity;
+
+class EmailVerification extends Entity
 {
     public $id;
     public $user_id;

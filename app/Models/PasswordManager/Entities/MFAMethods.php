@@ -2,7 +2,9 @@
 
 namespace App\Models\Entities;
 
-class MFAMethods
+use Models\Core\Entity;
+
+class MFAMethods extends Entity
 {
     public $id;
     public $user_id;
