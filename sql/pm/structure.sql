@@ -6,6 +6,7 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
+    email_hash TEXT NOT NULL,
     password TEXT NOT NULL,
     salt TEXT NOT NULL,
     is_verified BOOLEAN DEFAULT FALSE,

@@ -9,6 +9,7 @@ class User extends Entity
     public $id;
     public $username;
     public $email;
+    public $emailHash;
     public $password;
     public $salt;
     public $is_verified;
