@@ -55,3 +55,8 @@ security:
     enabled: true
     impact_threshold: 50
 
+twilio:
+  account_sid: !php/const TWILIO_ACCOUNT_SID
+  auth_token: !php/const TWILIO_AUTH_TOKEN
+  from_number: !php/const TWILIO_PHONE_NUMBER
+

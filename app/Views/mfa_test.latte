@@ -1,0 +1,50 @@
+{block content}
+<div class="container">
+    <h1>{$title}</h1>
+
+    <!-- Display messages passed from controller -->
+    {if isset($successMessage)}
+        <div class="alert alert-success">
+            {$successMessage|noescape}
+        </div>
+    {/if}
+    {if isset($errorMessage)}
+        <div class="alert alert-danger">
+            {$errorMessage|noescape}
+        </div>
+    {/if}
+
+    <!-- MFA Test Form -->
+    <form method="POST" action="/mfa-test">
+        <!-- Service Selection -->
+        <div class="form-group">
+            <label for="service">Select Service:</label>
+            <select name="service" id="service" class="form-control" required>
+                <option value="email">Email</option>
+                <option value="sms">SMS</option>
+            </select>
+        </div>
+
+        <!-- Recipient -->
+        <div class="form-group">
+            <label for="recipient">Recipient (Email or Phone Number in E.164 format):</label>
+            <input type="text" name="recipient" id="recipient" class="form-control" placeholder="e.g., test@example.com or +14508087148" required>
+        </div>
+
+        <!-- Use Generated Code -->
+        <div class="form-group form-check">
+            <input type="checkbox" name="use_generated_code" id="use_generated_code" class="form-check-input">
+            <label for="use_generated_code" class="form-check-label">Use Generated MFA Code</label>
+        </div>
+
+        <!-- Custom Body -->
+        <div class="form-group">
+            <label for="custom_body">Custom Message Body (if not using generated code):</label>
+            <textarea name="custom_body" id="custom_body" class="form-control" rows="3" placeholder="Enter your custom message here"></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Send Message</button>
+    </form>
+</div>
+{/block}
