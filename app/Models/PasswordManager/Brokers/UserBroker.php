@@ -45,8 +45,6 @@ class UserBroker extends Broker
 
     public function insert(User $user, string $encryptionKey): int
     {
-        $user->password = Cryptography::hashPassword($user->password);
-        $user->emailHash = EncryptionService::hash256($user->email);
         $encryptedUser = $this->encryptUser($user, $encryptionKey);
         return $this->save($encryptedUser);
     }

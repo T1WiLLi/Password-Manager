@@ -1,6 +1,40 @@
 {layout layouts/main.latte}
 
 {varType string $title}
+{varType array $errors}
+{var $errors = []}
 
 {block content}
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
+        <div class="text-center mb-4">
+            <img src="/assets/images/logo.png" alt="Logo" class="img-fluid" style="max-height: 80px;">
+        </div>
+
+        <h2 class="text-center mb-4">{$title}</h2>
+
+        {include "zf-flash"}
+
+        <form id="login-form" method="POST" action="/login" novalidate>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" name="email" id="email" class="form-control {if isset($errors['email'])}is-invalid{/if}" required>
+                {if isset($errors['email'])}
+                    <div class="invalid-feedback">{$errors['email']}</div>
+                {/if}
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" id="password" class="form-control {if isset($errors['password'])}is-invalid{/if}" required>
+                {if isset($errors['password'])}
+                    <div class="invalid-feedback">{$errors['password']}</div>
+                {/if}
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Sign In</button>
+            <div class="text-center mt-3">
+                <a href="/register" class="text-muted">No account? Sign Up!</a>
+            </div>
+        </form>
+    </div>
+</div>
 {/block}

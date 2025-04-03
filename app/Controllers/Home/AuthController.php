@@ -2,17 +2,38 @@
 
 namespace Controllers\Home;
 
+use Controllers\Controller;
 use Controllers\SecureController;
 use Models\PasswordManager\Brokers\UserBroker;
+use Models\PasswordManager\Services\AuthentificationService;
+use Zephyrus\Application\Flash;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router\Get;
 
-class AuthController extends SecureController
+class AuthController extends Controller
 {
-    #[Get('/me')]
-    public function me(): Response
+
+    #[Get('/login')]
+    public function loginView(): Response
     {
-        $user = new UserBroker()->findByIdDecrypt($this->getAuth()["user_id"], $this->getAuth()["user_key"]);
-        return $user != null ? $this->json($user) : $this->abortNotFound("Utilisateur introuvable.");
+        return $this->render('login', [
+            'title' => 'Connexion',
+        ]);
+    }
+
+    #[Get('/register')]
+    public function registerView(): Response
+    {
+        return $this->render('register', [
+            'title' => 'Inscription',
+        ]);
+    }
+
+    #[Get('/logout')]
+    public function logout(): Response
+    {
+        new AuthentificationService()->logout();
+        Flash::success("Déconnexion réussie.");
+        return $this->redirect('/login');
     }
 }

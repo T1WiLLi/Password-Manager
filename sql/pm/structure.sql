@@ -15,7 +15,7 @@ CREATE TABLE users (
     first_name TEXT,
     last_name TEXT,
     phone_number TEXT,
-    profile_image TEXT,
+    profile_image TEXT DEFAULT NULL,
     mfa_config INT DEFAULT 0 CHECK (mfa_config >= 0), --Bitwise operation
     mfa_grace_period_until TIMESTAMP
 );

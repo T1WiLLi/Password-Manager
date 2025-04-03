@@ -40,6 +40,11 @@ class EncryptionService
         return Cryptography::decrypt(json_decode($context))["user_key"] ?? null;
     }
 
+    public static function destroySession(): void
+    {
+        Session::destroy();
+    }
+
     public static function getUserIDFromContext(): ?string
     {
         $context = Session::get(self::CONTEXT_KEY);
