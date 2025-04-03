@@ -3,6 +3,7 @@
 namespace Models\PasswordManager\Brokers;
 
 use App\Models\Entities\User;
+use Models\PasswordManager\Services\EncryptionService;
 use Zephyrus\Security\Cryptography;
 
 class UserBroker extends Broker
@@ -14,19 +15,24 @@ class UserBroker extends Broker
 
     public function existsByEmail(string $email): bool
     {
-        $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE email_hash = ?", [Cryptography::hash($email, "sha256")]);
+        $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE email_hash = ?", [EncryptionService::hash256($email)]);
         return !$result ? false : true;
+    }
+
+    public function findByIdDecrypt(int $userID, string $encryptionKey): ?User
+    {
+        return $this->decryptUser($this->findById($userID), $encryptionKey);
     }
 
     public function findByEmail(string $email): ?User
     {
-        $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE email_hash = ?", [Cryptography::hash($email, "sha256")]);
+        $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE email_hash = ?", [EncryptionService::hash256($email)]);
         return $result ? User::build($result) : null;
     }
 
-    public function findByAuthentification(string $email, string $clearPassword): ?User
+    public function findByAuthentification(string $email, string $clearPassword, string $encryptionKey): ?User
     {
-        $emailHash = Cryptography::hash($email, "sha256");
+        $emailHash = EncryptionService::hash256($email);
         $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE email_hash = ?", [$emailHash]);
         if (!$result) {
             return null;
@@ -34,20 +40,14 @@ class UserBroker extends Broker
         if (!Cryptography::verifyHashedPassword($clearPassword, $result->password)) {
             return null;
         }
-        $encryptionKey = deriveEncryptionKey($clearPassword, $result->salt);
-        // Add to session object
         return $this->decryptUser($result, $encryptionKey);
     }
 
-    public function insert(User $user): int
+    public function insert(User $user, string $encryptionKey): int
     {
-        $salt = generateSalt();
-        $encryptionKey = deriveEncryptionKey($user->password, $salt);
-        $user->salt = $salt;
         $user->password = Cryptography::hashPassword($user->password);
-        $user->emailHash = Cryptography::hash($user->email, "sha256");
+        $user->emailHash = EncryptionService::hash256($user->email);
         $encryptedUser = $this->encryptUser($user, $encryptionKey);
-        // Add encryption key to session object and encrypt with encryption_project_key
         return $this->save($encryptedUser);
     }
 
@@ -60,19 +60,19 @@ class UserBroker extends Broker
     private function encryptUser(User $user, string $encryptionKey): User
     {
         if ($user->username) {
-            $user->username = encrypt($user->username, $encryptionKey);
+            $user->username = EncryptionService::encrypt($user->username, $encryptionKey);
         }
         if ($user->email) {
-            $user->email = encrypt($user->email, $encryptionKey);
+            $user->email = EncryptionService::encrypt($user->email, $encryptionKey);
         }
         if ($user->first_name) {
-            $user->first_name = encrypt($user->first_name, $encryptionKey);
+            $user->first_name = EncryptionService::encrypt($user->first_name, $encryptionKey);
         }
         if ($user->last_name) {
-            $user->last_name = encrypt($user->last_name, $encryptionKey);
+            $user->last_name = EncryptionService::encrypt($user->last_name, $encryptionKey);
         }
         if ($user->phone_number) {
-            $user->phone_number = encrypt($user->phone_number, $encryptionKey);
+            $user->phone_number = EncryptionService::encrypt($user->phone_number, $encryptionKey);
         }
 
         return $user;
@@ -85,11 +85,11 @@ class UserBroker extends Broker
         }
 
         $user = User::build($result);
-        $user->username = decrypt($user->username, $encryptionKey);
-        $user->email = decrypt($user->email, $encryptionKey);
-        $user->first_name = decrypt($user->first_name, $encryptionKey);
-        $user->last_name = decrypt($user->last_name, $encryptionKey);
-        $user->phone_number = decrypt($user->phone_number, $encryptionKey);
+        $user->username = EncryptionService::decrypt($user->username, $encryptionKey);
+        $user->email = EncryptionService::decrypt($user->email, $encryptionKey);
+        $user->first_name = EncryptionService::decrypt($user->first_name, $encryptionKey);
+        $user->last_name = EncryptionService::decrypt($user->last_name, $encryptionKey);
+        $user->phone_number = EncryptionService::decrypt($user->phone_number, $encryptionKey);
         return $user;
     }
 }

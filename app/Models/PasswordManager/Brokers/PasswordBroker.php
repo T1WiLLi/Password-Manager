@@ -3,6 +3,7 @@
 namespace Models\PasswordManager\Brokers;
 
 use App\Models\Entities\Password;
+use Models\PasswordManager\Services\EncryptionService;
 
 class PasswordBroker extends Broker
 {
@@ -36,16 +37,16 @@ class PasswordBroker extends Broker
     private function encryptPassword(Password $password, string $encryptionKey): Password
     {
         if ($password->service_name) {
-            $password->service_name = encrypt($password->service_name, $encryptionKey);
+            $password->service_name = EncryptionService::encrypt($password->service_name, $encryptionKey);
         }
         if ($password->username) {
-            $password->username = encrypt($password->username, $encryptionKey);
+            $password->username = EncryptionService::encrypt($password->username, $encryptionKey);
         }
         if ($password->password) {
-            $password->password = encrypt($password->password, $encryptionKey);
+            $password->password = EncryptionService::encrypt($password->password, $encryptionKey);
         }
         if ($password->notes) {
-            $password->notes = encrypt($password->notes, $encryptionKey);
+            $password->notes = EncryptionService::encrypt($password->notes, $encryptionKey);
         }
         return $password;
     }
@@ -57,10 +58,10 @@ class PasswordBroker extends Broker
         }
 
         $password = Password::build($result);
-        $password->service_name = decrypt($password->service_name, $encryptionKey);
-        $password->username = decrypt($password->username, $encryptionKey);
-        $password->password = decrypt($password->password, $encryptionKey);
-        $password->notes = decrypt($password->notes, $encryptionKey);
+        $password->service_name = EncryptionService::decrypt($password->service_name, $encryptionKey);
+        $password->username = EncryptionService::decrypt($password->username, $encryptionKey);
+        $password->password = EncryptionService::decrypt($password->password, $encryptionKey);
+        $password->notes = EncryptionService::decrypt($password->notes, $encryptionKey);
         return $password;
     }
 }
