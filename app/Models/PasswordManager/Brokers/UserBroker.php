@@ -14,12 +14,14 @@ class UserBroker extends Broker
 
     public function existsByEmail(string $email): bool
     {
-        $emailHash = Cryptography::hash($email, "sha256");
-        $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE email_hash = ?", [$emailHash]);
-        if (!$result) {
-            return false;
-        }
-        return true;
+        $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE email_hash = ?", [Cryptography::hash($email, "sha256")]);
+        return !$result ? false : true;
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE email_hash = ?", [Cryptography::hash($email, "sha256")]);
+        return $result ? User::build($result) : null;
     }
 
     public function findByAuthentification(string $email, string $clearPassword): ?User
