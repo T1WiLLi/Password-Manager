@@ -47,7 +47,7 @@ class AuthController extends Controller
             ]);
             $user = $this->authService->login($form);
             Flash::success("Login successful. Welcome, {$user->first_name}!");
-            return $this->redirect('/me');
+            return $this->redirect('/dashboard');
         } catch (FormException $e) {
             $errors = $e->getForm()->getErrorMessages();
         } catch (\Exception $e) {
@@ -81,8 +81,8 @@ class AuthController extends Controller
         try {
             $form = $this->buildForm();
             $user = $this->authService->register($form);
-            Flash::success("Registration successful. Welcome, {$user->first_name}!");
-            return $this->redirect('/me');
+            Flash::success("Registration successful. Welcome, {$form->getValue("first_name")}!");
+            return $this->redirect('/dashboard');
         } catch (FormException $e) {
             $errors = $e->getForm()->getErrorMessages();
         } catch (\Exception $e) {

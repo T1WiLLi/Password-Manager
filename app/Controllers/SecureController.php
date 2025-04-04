@@ -18,7 +18,6 @@ abstract class SecureController extends Controller
 
         if (is_null($this->currentUserKey) || is_null($this->currentUserId)) {
             return $this->redirect("/login");
-            return $this->abortUnauthorized("Session invalide ou expirée.");
         }
 
         return parent::before();

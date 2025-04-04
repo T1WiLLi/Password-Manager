@@ -9,20 +9,40 @@ use Zephyrus\Network\Router\Get;
 
 class Dashboard extends SecureController
 {
-    /**
-     * Displays the current user's profile.
-     */
-    #[Get('/me')]
-    public function me(): Response
+    #[Get('/dashboard')]
+    public function dashboard(): Response
     {
         $user = (new UserBroker())->findByIdDecrypt($this->getAuth()['user_id'], $this->getAuth()['user_key']);
-        if (!$user) {
-            return $this->abortNotFound("User not found.");
-        }
-
-        return $this->render('me', [
-            'title' => 'My Profile',
+        return $this->render('dashboard', [
+            'title' => 'Dashboard',
             'user' => $user
+        ]);
+    }
+
+    #[Get('/password')]
+    public function password(): Response
+    {
+        return $this->render('password', [
+            'title' => 'Gestion des mots de passe'
+        ]);
+    }
+
+    #[Get('/sharing')]
+    public function sharing(): Response
+    {
+        return $this->render('sharing', [
+            'title' => 'Partage de mot de passe'
+        ]);
+    }
+
+    #[Get('/profile')]
+    public function profile(): Response
+    {
+        $user = (new UserBroker())->findByIdDecrypt($this->getAuth()['user_id'], $this->getAuth()['user_key']);
+        return $this->render('profile', [
+            'title' => 'Profil',
+            'user' => $user,
+            'mfaSettings' => 0
         ]);
     }
 }

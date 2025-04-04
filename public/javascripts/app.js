@@ -1,4 +1,5 @@
 import FormValidator from "./FormValidator.js";
+import DateTimeDisplay from "./DateTimeDisplay.js";
 export default class Application {
 
     #configurations;
@@ -10,6 +11,7 @@ export default class Application {
     initialize() {
         this.#enableTooltips();
         this.#initializeFormValidation();
+        new DateTimeDisplay("date-time");
     }
 
     #enableTooltips() {

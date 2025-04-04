@@ -2,9 +2,13 @@ export default class FormValidator {
     #form;
     #fields;
     #tooltips = new Map();
+    #isLoginForm = false;
 
     constructor(formId) {
         this.#form = document.getElementById(formId);
+
+        this.#isLoginForm = formId === 'login-form';
+
         this.#fields = this.#form.querySelectorAll('input');
         this.#initialize();
     }
@@ -48,16 +52,19 @@ export default class FormValidator {
 
         if (field.required && !value) {
             errorMessage = `${this.#getFieldLabel(field)} is required.`;
-        } else if (name === 'email' && value && !this.#isValidEmail(value)) {
-            errorMessage = "Email address is invalid.";
-        } else if (name === 'password' && value && !this.#isValidPassword(value)) {
-            errorMessage = "Password must be at least 8 characters long, and contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
-        } else if (name === 'username' && value && (value.length < 3 || value.length > 50)) {
-            errorMessage = "Username must be between 3 and 50 characters long.";
-        } else if ((name === 'first_name' || name === 'last_name') && value && value.length > 32) {
-            errorMessage = `${this.#getFieldLabel(field)} must be 32 characters or less.`;
-        } else if (name === 'phone_number' && !this.#isValidPhone(value)) {
-            errorMessage = value ? "Phone number is invalid." : "Phone number is required.";
+        }
+        else if (!this.#isLoginForm) {
+            if (name === 'email' && value && !this.#isValidEmail(value)) {
+                errorMessage = "Email address is invalid.";
+            } else if (name === 'password' && value && !this.#isValidPassword(value)) {
+                errorMessage = "Password must be at least 8 characters long, and contain at least one uppercase letter, one lowercase letter, one number, and one special character.";
+            } else if (name === 'username' && value && (value.length < 3 || value.length > 50)) {
+                errorMessage = "Username must be between 3 and 50 characters long.";
+            } else if ((name === 'first_name' || name === 'last_name') && value && value.length > 32) {
+                errorMessage = `${this.#getFieldLabel(field)} must be 32 characters or less.`;
+            } else if (name === 'phone_number' && !this.#isValidPhone(value)) {
+                errorMessage = value ? "Phone number is invalid." : "Phone number is required.";
+            }
         }
 
         if (errorMessage) {

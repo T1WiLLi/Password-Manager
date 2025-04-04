@@ -12,6 +12,12 @@ class PasswordBroker extends Broker
         parent::__construct("passwords");
     }
 
+    public function existsByServiceAndUsername(string $serviceName, string $username): bool
+    {
+        $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE service_name = ? AND username = ?", [$serviceName, $username]);
+        return !$result ? false : true;
+    }
+
     public function findByUserId(int $userID, string $encryptionKey): array
     {
         $results = $this->select("SELECT * FROM {$this->table} WHERE user_id = ?", [$userID]);
