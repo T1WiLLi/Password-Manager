@@ -2,20 +2,20 @@
 
 namespace Models\PasswordManager\Brokers;
 
-use App\Models\Entities\LoginAttempts;
+use Models\PasswordManager\Entities\LoginAttempt;
 
 class LoginAttempsBroker extends Broker
 {
     public function __construct()
     {
-        parent::__construct("login_attemps");
+        parent::__construct("login_attempts");
     }
 
     public function findByUserID(int $userID, int $limit = 10): array
     {
         $sql = "SELECT * FROM {$this->table} WHERE user_id = ? ORDER BY login_time DESC LIMIT ?";
         $results = $this->select($sql, [$userID, $limit]);
-        return !$results ? LoginAttempts::buildArray($results) : [];
+        return !$results ? LoginAttempt::buildArray($results) : [];
     }
 
     public function deleteByUserID(int $userID): bool

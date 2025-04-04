@@ -1,4 +1,4 @@
-CREATE TYPE login_status AS ENUM ('success', 'failed');
+CREATE TYPE login_status AS ENUM ('success', 'failure');
 
 CREATE TYPE mfa_method_type AS ENUM ('email', 'sms', 'authenticator');
 

@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Models\Entities;
+namespace Models\PasswordManager\Entities;
 
 use Models\Core\Entity;
 
 class PasswordSharing extends Entity
 {
-    public $id;
-    public $password_id;
-    public $owner_id;
-    public $shared_with_id;
-    public $created_at;
-    public $updated_at;
-    public $status;
+    public int $id;
+    public int $password_id;
+    public int $owner_id;
+    public int $shared_with_id;
+    public string $created_at;
+    public string $updated_at;
+    public string $status;
 }

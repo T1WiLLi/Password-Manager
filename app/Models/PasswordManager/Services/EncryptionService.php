@@ -37,12 +37,9 @@ class EncryptionService
         if ($context === null) {
             return null;
         }
-        return Cryptography::decrypt(json_decode($context))["user_key"] ?? null;
-    }
-
-    public static function destroySession(): void
-    {
-        Session::destroy();
+        $decryptedContext = Cryptography::decrypt($context);
+        $contextData = json_decode($decryptedContext, true);
+        return $contextData["user_key"] ?? null;
     }
 
     public static function getUserIDFromContext(): ?string
@@ -51,7 +48,14 @@ class EncryptionService
         if ($context === null) {
             return null;
         }
-        return Cryptography::decrypt(json_decode($context))["user_id"] ?? null;
+        $decryptedContext = Cryptography::decrypt($context);
+        $contextData = json_decode($decryptedContext, true);
+        return $contextData["user_id"] ?? null;
+    }
+
+    public static function destroySession(): void
+    {
+        Session::destroy();
     }
 
     public static function hash256(string $data): string
@@ -59,8 +63,8 @@ class EncryptionService
         return Cryptography::hash($data, self::ALGORITHM_HASH_EMAIL);
     }
 
-    public static function generateSalt(int $length = 16): string
+    public static function generateSalt(int $length = 32): string
     {
-        return Cryptography::randomBytes($length);
+        return Cryptography::randomHex($length);
     }
 }

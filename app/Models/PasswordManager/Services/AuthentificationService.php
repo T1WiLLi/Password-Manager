@@ -2,10 +2,10 @@
 
 namespace Models\PasswordManager\Services;
 
-use App\Models\Entities\LoginAttempts;
-use App\Models\Entities\User;
 use Models\PasswordManager\Brokers\LoginAttempsBroker;
 use Models\PasswordManager\Brokers\UserBroker;
+use Models\PasswordManager\Entities\LoginAttempt;
+use Models\PasswordManager\Entities\User;
 use Models\PasswordManager\Validators\AuthentificationValidator;
 use Zephyrus\Application\Form;
 use Zephyrus\Security\Cryptography;
@@ -23,9 +23,9 @@ class AuthentificationService
         $user = new User();
         $user->username = $form->getValue("username");
         $user->email = $form->getValue("email");
-        $user->emailHash = EncryptionService::hash256($user->email);
+        $user->email_hash = EncryptionService::hash256($user->email);
         $user->password = Cryptography::hashPassword($form->getValue("password"));
-        $user->salt = EncryptionService::generateSalt(16); // 16 bytes salt
+        $user->salt = EncryptionService::generateSalt(32); // 16 bytes salt
         $user->first_name = $form->getValue("first_name");
         $user->last_name = $form->getValue("last_name");
         $user->phone_number = $form->getValue("phone_number") ?? null;
@@ -45,34 +45,52 @@ class AuthentificationService
     {
         AuthentificationValidator::validateLogin($form);
 
-        $user = new UserBroker()->findByEmail($form->getValue("email"));
+        $email = $form->getValue("email");
+        $ipAddress = $form->getValue("ipAddress");
+        $userAgent = $form->getValue("userAgent");
+        $location = $form->getValue("location");
+
+        $user = new UserBroker()->findByEmail($email);
+        $userID = $user ? $user->id : 0; // 0 if user is not found
+
         if (!$user) {
-            throw new \Exception("Invalid email or password");
+            throw new \Exception("Invalid email or password. Debug Info: 
+            Email: {$email}, 
+            User ID: {$userID}, 
+            IP Address: {$ipAddress}, 
+            User Agent: {$userAgent}, 
+            Location: {$location}");
         }
 
         $encryptionKey = EncryptionService::deriveEncryptionKey($form->getValue("password"), $user->salt);
-        $authenticatedUser = new UserBroker()->findByAuthentification($user->email, $form->getValue("password"), $encryptionKey);
+        $authenticatedUser = new UserBroker()->findByAuthentification($email, $form->getValue("password"), $encryptionKey);
 
         $status = $authenticatedUser ? "success" : "failure";
-        $userID = $user ? $user->id : 0; // Return 0 if user is not found
-        new LoginAttempsBroker()->save($this->generateLoginAttemps($userID, $form->getValue("ipAddress"), $form->getValue("userAgent"), $status, $form->getValue("location")));
+
+        new LoginAttempsBroker()->save($this->generateLoginAttemps($userID, $ipAddress, $userAgent, $status, $location));
 
         if (!$authenticatedUser) {
-            throw new \Exception("Invalid email or password");
+            throw new \Exception("Invalid email or password. Debug Info: 
+            Email: {$email}, 
+            User ID: {$userID}, 
+            User salt: {$user->salt}
+            Status: {$status}, 
+            Encryption key: {$encryptionKey}");
         }
 
         EncryptionService::storeUserKeyInSession($authenticatedUser->id, $encryptionKey);
         return $authenticatedUser;
     }
 
+
     public function logout(): void
     {
         EncryptionService::destroySession();
     }
 
-    private function generateLoginAttemps(int $userId, $ipAddress, $userAgent, $status, $location): LoginAttempts
+    private function generateLoginAttemps(int $userId, $ipAddress, $userAgent, $status, $location): LoginAttempt
     {
-        $loginAttempts = new LoginAttempts();
+        $loginAttempts = new LoginAttempt();
         $loginAttempts->user_id = $userId;
         $loginAttempts->ip_address = $ipAddress;
         $loginAttempts->user_agent = $userAgent;

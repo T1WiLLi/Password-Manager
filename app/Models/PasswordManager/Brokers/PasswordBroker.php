@@ -2,7 +2,7 @@
 
 namespace Models\PasswordManager\Brokers;
 
-use App\Models\Entities\Password;
+use Models\PasswordManager\Entities\Password;
 use Models\PasswordManager\Services\EncryptionService;
 
 class PasswordBroker extends Broker

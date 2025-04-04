@@ -2,7 +2,7 @@
 
 namespace Models\PasswordManager\Brokers;
 
-use App\Models\Entities\EmailVerification;
+use Models\PasswordManager\Entities\EmailVerification;
 
 class EmailVerificationBroker extends Broker
 {

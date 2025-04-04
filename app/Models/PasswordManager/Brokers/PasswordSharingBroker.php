@@ -2,8 +2,7 @@
 
 namespace Models\PasswordManager\Brokers;
 
-use App\Models\Entities\Password;
-use App\Models\Entities\PasswordSharing;
+use Models\PasswordManager\Entities\PasswordSharing;
 
 class PasswordSharingBroker extends Broker
 {

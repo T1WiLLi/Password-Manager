@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Models\Entities;
+namespace Models\PasswordManager\Entities;
 
 use Models\Core\Entity;
 
 class Password extends Entity
 {
-    public $id;
-    public $user_id;
-    public $service_name;
-    public $username;
-    public $password;
-    public $created_at;
-    public $last_used;
-    public $updated_at;
-    public $notes;
+    public int $id;
+    public int $user_id;
+    public string $service_name;
+    public string $username;
+    public string $password;
+    public string $created_at;
+    public ?string $last_used = null;
+    public string $updated_at;
+    public ?string $notes = null;
 }

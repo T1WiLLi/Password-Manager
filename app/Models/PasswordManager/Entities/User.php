@@ -1,24 +1,24 @@
 <?php
 
-namespace App\Models\Entities;
+namespace Models\PasswordManager\Entities;
 
 use Models\Core\Entity;
 
 class User extends Entity
 {
-    public $id;
-    public $username;
-    public $email;
-    public $emailHash;
-    public $password;
-    public $salt;
-    public $is_verified;
-    public $created_at;
-    public $updated_at;
-    public $first_name;
-    public $last_name;
-    public $phone_number;
-    public $profile_image;
-    public $mfa_config; // Bitwise mask (0=none, 1=email, 2=sms, 4=authenticator)
-    public $mfa_grace_period_until;
+    public int $id;
+    public string $username;
+    public string $email;
+    public string $email_hash;
+    public string $password;
+    public string $salt;
+    public bool $is_verified;
+    public string $created_at;
+    public string $updated_at;
+    public ?string $first_name = null;
+    public ?string $last_name = null;
+    public ?string $phone_number = null;
+    public ?string $profile_image = null;
+    public int $mfa_config; // Bitwise mask (0=none, 1=email, 2=sms, 4=authenticator)
+    public ?string $mfa_grace_period_until = null;
 }

@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Models\Entities;
+namespace Models\PasswordManager\Entities;
 
 use Models\Core\Entity;
 
 class EmailVerification extends Entity
 {
-    public $id;
-    public $user_id;
-    public $token;
-    public $created_at;
-    public $expires_at;
+    public int $id;
+    public int $user_id;
+    public string $token;
+    public string $created_at;
+    public string $expires_at;
 }
