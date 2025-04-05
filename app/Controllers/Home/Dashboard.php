@@ -16,7 +16,8 @@ class Dashboard extends SecureController
         return $this->render('dashboard', [
             'title' => 'Dashboard',
             'username' => $user->username,
-            'profile_picture' => $user->username[0],
+            'picture_set' => $user->profile_image != null,
+            'profile_image' => $user->profile_image,
         ]);
     }
 }
