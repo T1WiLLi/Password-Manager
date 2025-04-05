@@ -54,12 +54,7 @@ class AuthentificationService
         $userID = $user ? $user->id : 0; // 0 if user is not found
 
         if (!$user) {
-            throw new \Exception("Invalid email or password. Debug Info: 
-            Email: {$email}, 
-            User ID: {$userID}, 
-            IP Address: {$ipAddress}, 
-            User Agent: {$userAgent}, 
-            Location: {$location}");
+            throw new \Exception("Invalid email or password.");
         }
 
         $encryptionKey = EncryptionService::deriveEncryptionKey($form->getValue("password"), $user->salt);
@@ -70,12 +65,7 @@ class AuthentificationService
         new LoginAttempsBroker()->save($this->generateLoginAttemps($userID, $ipAddress, $userAgent, $status, $location));
 
         if (!$authenticatedUser) {
-            throw new \Exception("Invalid email or password. Debug Info: 
-            Email: {$email}, 
-            User ID: {$userID}, 
-            User salt: {$user->salt}
-            Status: {$status}, 
-            Encryption key: {$encryptionKey}");
+            throw new \Exception("Invalid email or password.");
         }
 
         EncryptionService::storeUserKeyInSession($authenticatedUser->id, $encryptionKey);

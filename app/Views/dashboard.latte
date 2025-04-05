@@ -1,0 +1,55 @@
+{extends "layouts/main.latte"}
+
+{block meta}
+    <meta name="description" content="Dashboard for password management" />
+{/block}
+
+{block content}
+    <div class="dashboard container py-5">
+        <header class="dashboard-header bg-primary text-white p-3 mb-4 rounded shadow">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold text-shadow">Hello, {$username}</h1>
+                    <p id="date-time" class="mb-0 fw-bold text-shadow">Loading date and time...</p>
+                </div>
+                <div>
+                    <a href="/profile" class="profile-badge" data-bs-toggle="tooltip" data-bs-placement="left" title="View Profile">
+                        <div class="user-avatar rounded-circle bg-light text-primary d-flex align-items-center justify-content-center">
+                            {$profile_picture}
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </header>
+        
+        <nav class="dashboard-nav mb-4">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" id="passwords-tab" data-bs-toggle="tab" href="#passwords">Passwords</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="sharing-tab" data-bs-toggle="tab" href="#sharing">Sharing</a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="passwords">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Your Passwords</h2>
+                        <p>This section will contain your saved passwords.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="sharing">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Shared Items</h2>
+                        <p>This section will contain passwords shared with you.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{/block}
