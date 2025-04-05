@@ -1,0 +1,253 @@
+{extends "layouts/main.latte"}
+
+{block content}
+    <div class="profile container py-5">
+        <header class="dashboard-header text-white p-4 mb-5 rounded position-relative overflow-hidden animate-fade">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold text-shadow">Your Profile, {$user->username}</h1>
+                    <p id="date-time" class="mb-0 fw-light text-shadow opacity-75">Loading date and time...</p>
+                </div>
+                <div>
+                    <a href="/dashboard" class="btn btn-effects btn-light">
+                        <i class="bi bi-arrow-left me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        {if isset($success)}
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="bi bi-check-circle-fill fs-5"></i>
+                <div>{$success}</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {/if}
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card w-100 h-100 animate-fade animate-delay-1 d-flex flex-column">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0 d-flex align-items-center">
+                            <i class="bi bi-shield-lock me-2 text-primary"></i>
+                            Update Password
+                        </h3>
+                    </div>
+                    <div class="card-body d-flex flex-column p-4">
+                        {if !empty($errors['password'])}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {foreach $errors['password'] as $error}
+                                    <i class="bi bi-exclamation-triangle-fill"></i> {$error}<br>
+                                {/foreach}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {/if}
+                        <form method="POST" action="/profile/update-password" class="d-flex flex-column h-100" novalidate>
+                            <input type="hidden" name="id" value="{$user->id}">
+                            <div class="mb-3">
+                                <label for="old-password" class="form-label">Old Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-key text-primary"></i>
+                                    </span>
+                                    <input type="password" class="form-control border-start-0" id="old-password" name="old_password" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="new-password" class="form-label">New Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-key-fill text-primary"></i>
+                                    </span>
+                                    <input type="password" class="form-control border-start-0" id="new-password" name="password" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirm-password" class="form-label">Confirm New Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-check-circle text-primary"></i>
+                                    </span>
+                                    <input type="password" class="form-control border-start-0" id="confirm-password" name="confirm_password" required>
+                                </div>
+                            </div>
+                            <div class="form-footer">
+                                <button type="submit" class="btn btn-primary btn-effects">
+                                    <i class="bi bi-shield-lock-fill me-2"></i>Update Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card w-100 h-100 animate-fade animate-delay-2 d-flex flex-column">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0 d-flex align-items-center">
+                            <i class="bi bi-person-circle me-2 text-primary"></i>
+                            Update Profile Details
+                        </h3>
+                    </div>
+                    <div class="card-body d-flex flex-column p-4">
+                        {if !empty($errors['details'])}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {foreach $errors['details'] as $error}
+                                    <i class="bi bi-exclamation-triangle-fill"></i> {$error}<br>
+                                {/foreach}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {/if}
+                        <form method="POST" action="/profile/update-details" class="d-flex flex-column h-100" novalidate>
+                            <input type="hidden" name="id" value="{$user->id}">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-person text-primary"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="username" name="username" value="{$user->username}" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="first-name" class="form-label">First Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-person-badge text-primary"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="first-name" name="first_name" value="{$user->first_name}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="last-name" class="form-label">Last Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-person-badge-fill text-primary"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="last-name" name="last_name" value="{$user->last_name}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone-number" class="form-label">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-telephone text-primary"></i>
+                                    </span>
+                                    <input type="tel" class="form-control border-start-0" id="phone-number" name="phone_number" value="{$user->phone_number}">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="profile-image" class="form-label">Profile Image URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-transparent border-end-0">
+                                        <i class="bi bi-image text-primary"></i>
+                                    </span>
+                                    <input type="url" class="form-control border-start-0" id="profile-image" name="profile_image" value="{$user->profile_image}" placeholder="https://example.com/image.jpg">
+                                </div>
+                            </div>
+                            <div class="form-footer">
+                                <button type="submit" class="btn btn-primary btn-effects">
+                                    <i class="bi bi-save me-2"></i>Update Profile
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MFA Section -->
+            <div class="col-12 mt-2">
+                <div class="card w-100 animate-fade animate-delay-3">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0 d-flex align-items-center">
+                            <i class="bi bi-shield-check me-2 text-primary"></i>
+                            Multi-Factor Authentication (MFA)
+                        </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="mfa-toggle">
+                            <div>
+                                <h5 class="mb-1 d-flex align-items-center">
+                                    <i class="bi bi-envelope-fill me-2 text-primary"></i>
+                                    Email OTP
+                                </h5>
+                                <p class="mfa-description">Receive a one-time password via email for additional security.</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="mfa-email" name="mfa_email" disabled>
+                                <label class="form-check-label" for="mfa-email">Enable</label>
+                            </div>
+                        </div>
+                        <div class="mfa-toggle">
+                            <div>
+                                <h5 class="mb-1 d-flex align-items-center">
+                                    <i class="bi bi-phone-fill me-2 text-primary"></i>
+                                    SMS OTP
+                                </h5>
+                                <p class="mfa-description">Get a one-time password sent to your phone number.</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="mfa-sms" name="mfa_sms" disabled>
+                                <label class="form-check-label" for="mfa-sms">Enable</label>
+                            </div>
+                        </div>
+                        <div class="mfa-toggle">
+                            <div>
+                                <h5 class="mb-1 d-flex align-items-center">
+                                    <i class="bi bi-qr-code me-2 text-primary"></i>
+                                    Google Authenticator
+                                </h5>
+                                <p class="mfa-description">Use the Google Authenticator app to generate time-based codes.</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="mfa-google" name="mfa_google" disabled>
+                                <label class="form-check-label" for="mfa-google">Enable</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light text-center py-3">
+                        <span class="text-muted small d-flex align-items-center justify-content-center">
+                            <i class="bi bi-info-circle me-2"></i>
+                            MFA options are currently disabled. Contact support to enable these features.
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer py-5 mt-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-primary">JoltSecure</h5>
+                    <p class="text-muted">Secure, simple, reliable password management for everyone.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="fw-bold text-dark mb-3">Links</h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2"><a href="#" class="nav-link ps-0 text-muted"><i class="bi bi-question-circle me-2"></i>Help Center</a></li>
+                        <li class="nav-item mb-2"><a href="#" class="nav-link ps-0 text-muted"><i class="bi bi-shield-check me-2"></i>Security</a></li>
+                        <li class="nav-item mb-2"><a href="#" class="nav-link ps-0 text-muted"><i class="bi bi-envelope me-2"></i>Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5 class="fw-bold text-dark mb-3">Legal</h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item mb-2"><a href="#" class="nav-link ps-0 text-muted"><i class="bi bi-file-text me-2"></i>Privacy Policy</a></li>
+                        <li class="nav-item mb-2"><a href="#" class="nav-link ps-0 text-muted"><i class="bi bi-file-earmark-text me-2"></i>Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                <p class="mb-3 mb-sm-0 text-muted">© 2025 JoltSecure. All rights reserved.</p>
+                <ul class="list-unstyled d-flex mb-0">
+                    <li class="ms-3"><a href="#" class="text-muted"><i class="bi bi-twitter fs-5"></i></a></li>
+                    <li class="ms-3"><a href="#" class="text-muted"><i class="bi bi-facebook fs-5"></i></a></li>
+                    <li class="ms-3"><a href="#" class="text-muted"><i class="bi bi-github fs-5"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+{/block}

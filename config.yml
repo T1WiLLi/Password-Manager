@@ -1,4 +1,5 @@
 application:
+  name: "JoltSecure"
   project: "Template"
   env: "dev"
   contact_email: "info@ophelios.com"

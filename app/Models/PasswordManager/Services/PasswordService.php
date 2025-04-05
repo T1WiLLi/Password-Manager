@@ -7,7 +7,7 @@ use Models\PasswordManager\Entities\Password;
 use PasswordValidator;
 use Zephyrus\Application\Form;
 
-class PasswordManagerService
+class PasswordService
 {
     public function getAllPasswords($userID): array
     {
@@ -32,16 +32,24 @@ class PasswordManagerService
             throw new \Exception("Password already exists for this service and username.");
         }
 
-        $password = $form->buildEntity(Password::class);
+        $password = buildEntity(Password::class, $form);
         $password->id = new PasswordBroker()->insert($password, EncryptionService::getUserKeyFromSession());
         return $password;
     }
 
     public function updatePassword(Form $form): Password
     {
-        $password = $form->updateEntity(Password::build(new PasswordBroker()->findById($form->getValue("id"))), ["id"]);
+        $password = updateEntity(Password::build(new PasswordBroker()->findById($form->getValue("id"))), $form, ["id"]);
         new PasswordBroker()->update($password, EncryptionService::getUserKeyFromSession());
         return $password;
+    }
+
+    public function updatePasswordEncryption(int $userID, string $newEncryptionKey, string $oldEncryptionKey): void
+    {
+        $passwords = new PasswordBroker()->findByUserId($userID, $oldEncryptionKey);
+        foreach ($passwords as $password) {
+            new PasswordBroker()->update($password, $newEncryptionKey);
+        }
     }
 
     public function deletePassword(int $id): void

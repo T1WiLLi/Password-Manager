@@ -1,6 +1,7 @@
 <?php
 
 use Models\Core\Validators\Validator;
+use Models\Exceptions\FormException;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Rule;
 
@@ -20,5 +21,9 @@ class PasswordValidator
             Rule::required("Password is required"),
             Rule::passwordCompliant("Password must include at least 8 characters, an uppercase letter, a lowercase letter, a number and a special character."),
         ]);
+
+        if (!$form->verify()) {
+            throw new FormException($form);
+        }
     }
 }

@@ -1,32 +1,6 @@
 {extends "layouts/main.latte"}
 
 {block content}
-    <style>
-        .hover-glow:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-            outline: 3px solid #3d3d3d;
-            cursor: pointer;
-            transform: translateY(-2px);
-        }
-
-        .hover-scale:hover {
-            transform: scale(1.1);
-        }
-
-        .transition {
-            transition: all 0.3s ease;
-        }
-
-        .animate-fade {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-    </style>
-
     <div class="dashboard container py-5">
         <header class="dashboard-header bg-primary text-white p-4 mb-4 rounded-lg shadow-lg position-relative overflow-hidden">
             <div class="d-flex justify-content-between align-items-center">
@@ -36,9 +10,9 @@
                 </div>
                 <div>
                     <a href="/profile" class="profile-badge" data-bs-toggle="tooltip" data-bs-placement="left" title="View Profile">
-                        <div class="user-avatar rounded-circle bg-light text-primary d-flex align-items-center justify-content-center hover-scale" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: bold; overflow: hidden; transition: transform 0.3s ease;">
+                        <div class="user-avatar rounded-circle bg-light text-primary d-flex align-items-center justify-content-center hover-scale">
                             {if $picture_set}
-                                <img src="{$profile_image}" alt="{$username}'s profile" class="img-fluid rounded-circle">
+                                <img src="{$profile_image}" alt="{$username}'s profile" class="img-fluid rounded-circle" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                             {else}
                                 {substr($username, 0, 1)}
                             {/if}
@@ -82,10 +56,10 @@
         </div>
 
         <div class="row g-4 mt-4 align-items-stretch">
-            <!-- Quick Actions Card - Left 50% -->
+            <!-- Quick Actions Card -->
             <div class="col-md-6">
-                <div class="card w-100 shadow-sm h-100">
-                    <div class="card-header bg-light">
+                <div class="card h-100">
+                    <div class="card-header">
                         <h3 class="h5 mb-0">Quick Actions</h3>
                     </div>
                     <div class="card-body">
@@ -100,7 +74,7 @@
                             ] as $action}
                                 <div class="col-6">
                                     <div class="action-item d-flex align-items-center p-2 rounded hover-glow transition">
-                                        <div class="action-icon bg-{$action['bg']} rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <div class="action-icon bg-{$action['bg']} rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center">
                                             <i class="bi bi-{$action['icon']}"></i>
                                         </div>
                                         <div class="action-info">
@@ -114,15 +88,15 @@
                 </div>
             </div>
 
-            <!-- Password Statistics - Right 50% -->
+            <!-- Password Statistics Card -->
             <div class="col-md-6">
-                <div class="card w-100 shadow-sm h-100">
-                    <div class="card-header bg-light">
+                <div class="card h-100">
+                    <div class="card-header">
                         <h3 class="h5 mb-0">Password Statistics</h3>
                     </div>
                     <div class="card-body d-flex flex-column justify-content-center">
                         <div class="stat-item d-flex align-items-center mb-4">
-                            <div class="stat-icon bg-primary rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <div class="stat-icon bg-primary rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center">
                                 <i class="bi bi-key"></i>
                             </div>
                             <div class="stat-info">
@@ -132,7 +106,7 @@
                         </div>
 
                         <div class="stat-item d-flex align-items-center mb-4">
-                            <div class="stat-icon bg-warning rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <div class="stat-icon bg-warning rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center">
                                 <i class="bi bi-exclamation-triangle"></i>
                             </div>
                             <div class="stat-info">
@@ -142,7 +116,7 @@
                         </div>
 
                         <div class="stat-item d-flex align-items-center">
-                            <div class="stat-icon bg-info rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <div class="stat-icon bg-info rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center">
                                 <i class="bi bi-share"></i>
                             </div>
                             <div class="stat-info">

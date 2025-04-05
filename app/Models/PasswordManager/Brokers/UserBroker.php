@@ -32,34 +32,16 @@ class UserBroker extends Broker
 
     public function findByAuthentification(string $email, string $clearPassword, string $encryptionKey): ?User
     {
-        // Log incoming parameters (Be careful with logging sensitive data like passwords)
-        error_log("[DEBUG] findByAuthentification called with Email: {$email}");
-
-        // Hash the email for lookup
         $emailHash = EncryptionService::hash256($email);
-        error_log("[DEBUG] Generated email hash: {$emailHash}");
-
-        // Execute the query to find the user
         $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE email_hash = ?", [$emailHash]);
         if (!$result) {
-            error_log("[ERROR] No user found for email hash: {$emailHash}");
             return null;
         }
-
-        error_log("[DEBUG] User found, verifying password...");
-
-        // Verify the hashed password
         if (!Cryptography::verifyHashedPassword($clearPassword, $result->password)) {
-            error_log("[ERROR] Password verification failed for user ID: {$result->id}");
             return null;
         }
 
-        error_log("[DEBUG] Password verification successful, decrypting user data...");
-
-        // Decrypt and return the user object
         $user = $this->decryptUser($result, $encryptionKey);
-        error_log("[DEBUG] User successfully decrypted: ID {$user->id}, Email Hash: {$emailHash}");
-
         return $user;
     }
 
