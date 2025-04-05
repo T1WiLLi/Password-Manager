@@ -78,17 +78,6 @@
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
-.dashboard-header::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 300px;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    transform: skewX(-30deg);
-}
-
 .dashboard-header h1 {
     font-size: 2.2rem;
     margin-bottom: 0.5rem;
@@ -256,9 +245,17 @@
     cursor: pointer;
 }
 
+.form-check-input:focus {
+    box-shadow: none !important;
+}
+
+.form-control:focus {
+    box-shadow: none !important;
+}
+
 .form-check-input:checked {
     background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    border-color: none !important;
 }
 
 /* ========== Alerts ========== */

@@ -1,16 +1,94 @@
 {block dashboard-content}
-    <div id="component-passwords" data-component style="display: none;">
-        <h2 class="h4 mb-4">Your Passwords</h2>
-        <p class="text-muted">Manage and view all your saved passwords here.</p>
+<div id="component-passwords" data-component style="min-height: 25vh;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0">Your Passwords</h2>
+        <button class="btn btn-primary d-flex align-items-center gap-2" id="toggleAddPassword"
+            data-bs-toggle="collapse" data-bs-target="#addPasswordForm" aria-expanded="false" aria-controls="addPasswordForm">
+            <i class="bi bi-plus-lg" id="toggleIcon"></i><span id="toggleText">Add Password</span>
+        </button>
     </div>
+    <p class="text-muted">Manage and view all your saved passwords here.</p>
 
-    <div id="component-sharing" data-component style="display: none;">
-        <h2 class="h4 mb-4">Sharing Center</h2>
-        <p class="text-muted">View and manage shared passwords with other users.</p>
+    <div class="collapse" id="addPasswordForm">
+        <div class="card card-body mb-4">
+            <h5 class="card-title">Add New Password</h5>
+            <form id="passwordForm">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="passwordServiceName" class="form-label">Service Name</label>
+                        <input type="text" class="form-control" id="passwordServiceName" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="passwordUsername" class="form-label">Username/Email</label>
+                        <input type="text" class="form-control" id="passwordUsername" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="passwordValue" class="form-label">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="passwordValue" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="passwordUrl" class="form-label">Website URL</label>
+                        <input type="url" class="form-control" id="passwordUrl">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="passwordNotes" class="form-label">Notes</label>
+                    <textarea class="form-control" id="passwordNotes" rows="3"></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="collapse"
+                        data-bs-target="#addPasswordForm" aria-expanded="false"
+                        aria-controls="addPasswordForm">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-    <div id="component-groups" data-component style="display: none;">
-        <h2 class="h4 mb-4">Password Groups</h2>
-        <p class="text-muted">Organize your passwords into groups for easier management.</p>
-    </div>
+<div id="component-sharing" data-component style="min-height: 25vh;">
+    <h2 class="h4 mb-4">Sharing Center</h2>
+    <p class="text-muted">View and manage shared passwords with other users.</p>
+</div>
+
+<div id="component-groups" data-component style="min-height: 25vh;">
+    <h2 class="h4 mb-4">Password Groups</h2>
+    <p class="text-muted">Organize your passwords into groups for easier management.</p>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('passwordValue');
+
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('bi-eye');
+            this.querySelector('i').classList.toggle('bi-eye-slash');
+        });
+
+        const toggleBtn = document.getElementById('toggleAddPassword');
+        const collapseElement = document.getElementById('addPasswordForm');
+        const icon = document.getElementById('toggleIcon');
+        const text = document.getElementById('toggleText');
+
+        collapseElement.addEventListener('show.bs.collapse', () => {
+            icon.classList.replace('bi-plus-lg', 'bi-dash-lg');
+            text.textContent = 'Close';
+        });
+
+        collapseElement.addEventListener('hide.bs.collapse', () => {
+            icon.classList.replace('bi-dash-lg', 'bi-plus-lg');
+            text.textContent = 'Add Password';
+        });
+    });
+</script>
 {/block}
