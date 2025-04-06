@@ -25,15 +25,6 @@ class PasswordService
         return new PasswordBroker()->countDuplicatePasswords($userID, EncryptionService::getUserKeyFromSession());
     }
 
-    public function revealPassword(int $id): string
-    {
-        $password = new PasswordBroker()->findById($id);
-        if ($password === null) {
-            throw new \Exception("Password not found.");
-        }
-        return EncryptionService::decrypt($password->password, EncryptionService::getUserKeyFromSession());
-    }
-
     public function createPassword(Form $form): Password
     {
         PasswordValidator::validatePassword($form);

@@ -334,3 +334,13 @@ footer i {
         font-size: 1.8rem;
     }
 }
+
+/* ========== Remove modal backdrop ========== */
+
+.modal-backdrop {
+    display: none !important;
+}
+
+.modal-backdrop.fade {
+    opacity: 0 !important;
+}

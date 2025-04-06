@@ -43,7 +43,7 @@ class EncryptionService
         return $contextData["user_key"] ?? null;
     }
 
-    public static function getUserIDFromContext(): ?string
+    public static function getUserIDFromSession(): ?string
     {
         $context = Session::get(self::CONTEXT_KEY);
         if ($context === null) {

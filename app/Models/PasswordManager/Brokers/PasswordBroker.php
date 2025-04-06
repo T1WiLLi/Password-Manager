@@ -39,6 +39,11 @@ class PasswordBroker extends Broker
         return $count;
     }
 
+    public function findByIdDecrypt(int $id, string $encryptionKey): ?Password
+    {
+        return $this->decryptPassword($this->findById($id), $encryptionKey);
+    }
+
     public function findByUserId(int $userID, string $encryptionKey): array
     {
         $results = $this->select("SELECT * FROM {$this->table} WHERE user_id = ?", [$userID]);

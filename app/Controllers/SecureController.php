@@ -16,7 +16,7 @@ abstract class SecureController extends Controller
     public function before(): ?Response
     {
         $this->currentUserKey = ServicesEncryptionService::getUserKeyFromSession();
-        $this->currentUserId = ServicesEncryptionService::getUserIdFromContext();
+        $this->currentUserId = ServicesEncryptionService::getUserIdFromSession();
 
         if (is_null($this->currentUserKey) || is_null($this->currentUserId)) {
             return $this->redirect("/login");
