@@ -51,7 +51,11 @@
             </div>
 
             <div id="component-container">
-                {include "dashboard-content.latte"}
+                {block dashboard-content}
+                    {include './components/dashboard-passwords.latte', passwords => $passwords, errors => ($errors ?? [])}
+                    {include './components/dashboard-sharing.latte'}
+                    {include './components/dashboard-groups.latte'}
+                {/block}
             </div>
         </div>
 

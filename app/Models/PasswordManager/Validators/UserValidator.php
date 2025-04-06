@@ -62,6 +62,13 @@ class UserValidator
             }, "Password must not be the same as the current one!")
         ]);
 
+        $form->field("old_password", [
+            Rule::required("Old password is required"),
+            new Rule(function ($oldPassword) use ($currentUser) {
+                return Cryptography::verifyHashedPassword($oldPassword, $currentUser->password);
+            }, "Old password is incorrect!")
+        ]);
+
         if (!$form->verify()) {
             throw new FormException($form);
         }

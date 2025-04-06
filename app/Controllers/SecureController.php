@@ -2,7 +2,9 @@
 
 namespace Controllers;
 
+use Models\PasswordManager\Entities\User;
 use Models\PasswordManager\Services\EncryptionService as ServicesEncryptionService;
+use Models\PasswordManager\Services\UserService;
 use Zephyrus\Application\Controller;
 use Zephyrus\Network\Response;
 
@@ -26,5 +28,10 @@ abstract class SecureController extends Controller
     public function getAuth(): array
     {
         return ["user_id" => $this->currentUserId, "user_key" => $this->currentUserKey];
+    }
+
+    public function getUser(): User
+    {
+        return new UserService()->getUser($this->currentUserId, $this->currentUserKey);
     }
 }

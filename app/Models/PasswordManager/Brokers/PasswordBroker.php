@@ -18,6 +18,27 @@ class PasswordBroker extends Broker
         return !$result ? false : true;
     }
 
+    public function countByUserId(int $userID): int
+    {
+        $result = $this->selectSingle("SELECT COUNT(*) as count FROM {$this->table} WHERE user_id = ?", [$userID]);
+        return (int)$result->count;
+    }
+
+    public function countDuplicatePasswords(int $userID, string $encryptionKey): int
+    {
+        $passwords = $this->findByUserId($userID, $encryptionKey);
+        $uniquePasswords = [];
+        $count = 0;
+        foreach ($passwords as $password) {
+            if (in_array($password->service_name, $uniquePasswords)) {
+                $count++;
+            } else {
+                $uniquePasswords[] = $password->service_name;
+            }
+        }
+        return $count;
+    }
+
     public function findByUserId(int $userID, string $encryptionKey): array
     {
         $results = $this->select("SELECT * FROM {$this->table} WHERE user_id = ?", [$userID]);

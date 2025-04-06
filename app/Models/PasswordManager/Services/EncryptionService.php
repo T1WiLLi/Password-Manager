@@ -2,6 +2,7 @@
 
 namespace Models\PasswordManager\Services;
 
+use InvalidArgumentException;
 use Zephyrus\Core\Session;
 use Zephyrus\Security\Cryptography;
 
@@ -66,5 +67,21 @@ class EncryptionService
     public static function generateSalt(int $length = 32): string
     {
         return Cryptography::randomHex($length);
+    }
+
+    public static function generateCompliantPassword(int $length = 12): string
+    {
+        if ($length < 8) {
+            throw new InvalidArgumentException('Password length must be at least 8 characters.');
+        }
+
+        $upper = Cryptography::randomString(1, range('A', 'Z'));
+        $lower = Cryptography::randomString(1, range('a', 'z'));
+        $number = Cryptography::randomString(1, range('0', '9'));
+        $special = Cryptography::randomString(1, '!@#$%^&*()-_=+[]{}|;:,.<>?');
+        $remaining = Cryptography::randomString($length - 8);
+
+        $password = str_shuffle($upper . $lower . $number . $special . $remaining);
+        return $password;
     }
 }

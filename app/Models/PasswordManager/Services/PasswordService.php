@@ -4,7 +4,7 @@ namespace Models\PasswordManager\Services;
 
 use Models\PasswordManager\Brokers\PasswordBroker;
 use Models\PasswordManager\Entities\Password;
-use PasswordValidator;
+use Models\PasswordManager\Validators\PasswordValidator;
 use Zephyrus\Application\Form;
 
 class PasswordService
@@ -13,6 +13,16 @@ class PasswordService
     {
         $passwords = new PasswordBroker()->findByUserId($userID, EncryptionService::getUserKeyFromSession());
         return $passwords;
+    }
+
+    public function getPasswordCountByUserId(int $userID): int
+    {
+        return new PasswordBroker()->countByUserId($userID);
+    }
+
+    public function getDuplicatePasswordCount(int $userID): int
+    {
+        return new PasswordBroker()->countDuplicatePasswords($userID, EncryptionService::getUserKeyFromSession());
     }
 
     public function revealPassword(int $id): string

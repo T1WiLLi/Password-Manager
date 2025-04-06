@@ -1,6 +1,7 @@
 <?php
 
-use Models\Core\Validators\Validator;
+namespace Models\PasswordManager\Validators;
+
 use Models\Exceptions\FormException;
 use Zephyrus\Application\Form;
 use Zephyrus\Application\Rule;
