@@ -2,7 +2,9 @@
 
 namespace Models\PasswordManager\mfa;
 
+use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Mailer\Mailer;
+use Zephyrus\Application\Mailer\MailerSmtpConfiguration;
 use Zephyrus\Security\Cryptography;
 
 class EmailMFA
@@ -11,7 +13,8 @@ class EmailMFA
 
     public function __construct()
     {
-        $this->mailer = new Mailer(null);
+        $config = new MailerSmtpConfiguration(Configuration::getMailer('smtp'));
+        $this->mailer = new Mailer($config);
         $this->mailer->setFrom(config('mailer', "from_address"), config('mailer', "from_name"));
     }
 

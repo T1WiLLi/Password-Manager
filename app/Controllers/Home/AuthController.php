@@ -19,9 +19,6 @@ class AuthController extends Controller
         $this->authService = new AuthentificationService();
     }
 
-    /**
-     * Displays the login form.
-     */
     #[Get('/login')]
     public function loginView(): Response
     {
@@ -31,9 +28,6 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Handles the login form submission.
-     */
     #[Post('/login')]
     public function login(): Response
     {
@@ -59,9 +53,6 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Displays the registration form.
-     */
     #[Get('/register')]
     public function registerView(): Response
     {
@@ -71,16 +62,13 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Handles the registration form submission.
-     */
     #[Post('/register')]
     public function register(): Response
     {
         $errors = [];
         try {
             $form = $this->buildForm();
-            $user = $this->authService->register($form);
+            $this->authService->register($form);
             Flash::success("Registration successful. Welcome, {$form->getValue("first_name")}!");
             return $this->redirect('/dashboard');
         } catch (FormException $e) {
@@ -94,9 +82,6 @@ class AuthController extends Controller
         ]);
     }
 
-    /**
-     * Logs out the current user.
-     */
     #[Get('/logout')]
     public function logout(): Response
     {

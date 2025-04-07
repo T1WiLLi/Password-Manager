@@ -77,9 +77,6 @@ class PasswordBroker extends Broker
         if ($password->password) {
             $password->password = EncryptionService::encrypt($password->password, $encryptionKey);
         }
-        if ($password->notes) {
-            $password->notes = EncryptionService::encrypt($password->notes, $encryptionKey);
-        }
         return $password;
     }
 
@@ -93,7 +90,6 @@ class PasswordBroker extends Broker
         $password->service_name = EncryptionService::decrypt($password->service_name, $encryptionKey);
         $password->username = EncryptionService::decrypt($password->username, $encryptionKey);
         $password->password = EncryptionService::decrypt($password->password, $encryptionKey);
-        $password->notes = EncryptionService::decrypt($password->notes, $encryptionKey);
         return $password;
     }
 }

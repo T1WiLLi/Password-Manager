@@ -10,7 +10,7 @@ class PasswordValidator
 {
     public static function validatePassword(Form $form): void
     {
-        $form->field("serviceName", [
+        $form->field("service_name", [
             Rule::required("Service name is required"),
             Rule::minLength(3, "Service name must be at least 3 characters long"),
         ]);

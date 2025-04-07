@@ -2,6 +2,7 @@
 
 namespace Models\PasswordManager\mfa;
 
+use Tracy\Debugger;
 use Twilio\Rest\Client as TwilioClient;
 use Zephyrus\Security\Cryptography;
 
@@ -15,6 +16,9 @@ class SmsMFA
         $sid = config('twilio', "account_sid");
         $token = config('twilio', "auth_token");
         $this->fromNumber = config('twilio', "from_number");
+
+        Debugger::barDump($sid);
+        Debugger::barDump($token);
 
         if (!$sid || !$token || !$this->fromNumber) {
             throw new \RuntimeException("Twilio configuration is missing: account_sid=$sid, auth_token=$token, from_number=$this->fromNumber");

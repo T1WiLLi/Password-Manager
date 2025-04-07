@@ -3,25 +3,24 @@
 namespace Controllers;
 
 use Models\PasswordManager\Entities\User;
-use Models\PasswordManager\Services\EncryptionService as ServicesEncryptionService;
+use Models\PasswordManager\Services\EncryptionService;
 use Models\PasswordManager\Services\UserService;
 use Zephyrus\Application\Controller;
 use Zephyrus\Network\Response;
 
 abstract class SecureController extends Controller
 {
-    protected ?string $currentUserId = null;
-    protected ?string $currentUserKey = null;
+    private ?string $currentUserId = null;
+    private ?string $currentUserKey = null;
 
     public function before(): ?Response
     {
-        $this->currentUserKey = ServicesEncryptionService::getUserKeyFromSession();
-        $this->currentUserId = ServicesEncryptionService::getUserIdFromSession();
+        $this->currentUserKey = EncryptionService::getUserKeyFromSession();
+        $this->currentUserId = EncryptionService::getUserIdFromSession();
 
         if (is_null($this->currentUserKey) || is_null($this->currentUserId)) {
             return $this->redirect("/login");
         }
-
         return parent::before();
     }
 

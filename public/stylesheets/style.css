@@ -337,10 +337,22 @@ footer i {
 
 /* ========== Remove modal backdrop ========== */
 
+.modal {
+    position: absolute !important;
+    z-index: 1000 !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+}
+
 .modal-backdrop {
     display: none !important;
 }
 
 .modal-backdrop.fade {
+    opacity: 0 !important;
+}
+
+.modal-backdrop.show {
     opacity: 0 !important;
 }

@@ -33,14 +33,15 @@ class PasswordService
             throw new \Exception("Password already exists for this service and username.");
         }
 
-        $password = buildEntity(Password::class, $form);
+        $password = Password::build($form->buildObject());
+        $password->user_id = EncryptionService::getUserIDFromSession();
         $password->id = new PasswordBroker()->insert($password, EncryptionService::getUserKeyFromSession());
         return $password;
     }
 
-    public function updatePassword(Form $form): Password
+    public function updatePassword(Form $form, int $id): Password
     {
-        $password = updateEntity(Password::build(new PasswordBroker()->findById($form->getValue("id"))), $form, ["id"]);
+        $password = updateEntity(Password::build(new PasswordBroker()->findById($id)), $form, ["id"]);
         new PasswordBroker()->update($password, EncryptionService::getUserKeyFromSession());
         return $password;
     }
