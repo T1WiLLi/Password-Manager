@@ -69,6 +69,7 @@ class AuthentificationService
         }
 
         EncryptionService::storeUserKeyInSession($authenticatedUser->id, $encryptionKey);
+        new PasswordSharingService()->activateSharing();
         return $authenticatedUser;
     }
 

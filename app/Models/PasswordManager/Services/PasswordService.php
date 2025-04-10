@@ -3,7 +3,9 @@
 namespace Models\PasswordManager\Services;
 
 use Models\PasswordManager\Brokers\PasswordBroker;
+use Models\PasswordManager\Brokers\PasswordSharingBroker;
 use Models\PasswordManager\Entities\Password;
+use Models\PasswordManager\Entities\PasswordSharing;
 use Models\PasswordManager\Validators\PasswordValidator;
 use Zephyrus\Application\Form;
 
@@ -42,6 +44,7 @@ class PasswordService
     public function updatePassword(Form $form, int $id): Password
     {
         $password = updateEntity(Password::build(new PasswordBroker()->findById($id)), $form, ["id"]);
+        $this->updateSharingOnPasswordUpdate($id, $password);
         new PasswordBroker()->update($password, EncryptionService::getUserKeyFromSession());
         return $password;
     }
@@ -54,8 +57,24 @@ class PasswordService
         }
     }
 
-    public function deletePassword(int $id): void
+    public function deletePassword(int $id): bool
     {
-        new PasswordBroker()->delete($id);
+        new PasswordSharingBroker()->deleteByPasswordId($id);
+        return new PasswordBroker()->delete($id);
+    }
+
+    private function updateSharingOnPasswordUpdate(int $passwordID, Password $newPassword)
+    {
+        $existingSharings = PasswordSharing::buildArray(new PasswordSharingBroker()->findByPasswordID($passwordID));
+
+        if (!empty($existingSharings)) {
+            foreach ($existingSharings as $sharing) {
+                try {
+                    new PasswordSharingService()->updateSharing($sharing, $newPassword);
+                } catch (\Exception $e) {
+                    error_log("Failed to update sharing ID: {$sharing->id} for password ID: $passwordID: " . $e->getMessage());
+                }
+            }
+        }
     }
 }

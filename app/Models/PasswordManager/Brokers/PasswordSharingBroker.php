@@ -11,11 +11,11 @@ class PasswordSharingBroker extends Broker
         parent::__construct("password_sharing");
     }
 
-    public function sharePassword(int $passwordID, int $ownerID, int $sharedUserID, string $status = "active"): int
+    public function sharePassword(int $passwordID, int $ownerID, int $sharedUserID, string $encryptedData, string $status = "pending"): int
     {
-        $sql = "INSERT INTO {$this->table} (password_id, owner_id, shared_with_id, created_at, updated_at, status) 
-                VALUES (?, ?, ?, NOW(), NOW(), ?) RETURNING id";
-        $result = $this->query($sql, [$passwordID, $ownerID, $sharedUserID, $status]);
+        $sql = "INSERT INTO {$this->table} (password_id, owner_id, shared_with_id, encrypted_data, sharing_status, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ? NOW(), NOW()) RETURNING id";
+        $result = $this->query($sql, [$passwordID, $ownerID, $sharedUserID, $encryptedData, $status]);
         return isset($result->id) ? (int) $result->id : 0;
     }
 
@@ -39,7 +39,7 @@ class PasswordSharingBroker extends Broker
     public function deleteByPasswordId(int $passwordId): bool
     {
         $sql = "DELETE FROM password_sharing WHERE password_id = ?";
-        $result = $this->query($sql, [$passwordId]);
+        $this->query($sql, [$passwordId]);
         return $this->getLastAffectedCount() > 0;
     }
 
