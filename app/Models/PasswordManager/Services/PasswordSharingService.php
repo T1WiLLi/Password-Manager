@@ -43,15 +43,6 @@ class PasswordSharingService
             return [];
         }
 
-        foreach ($sharings as $sharing) {
-            try {
-                $decryptedData = EncryptionService::decrypt($sharing->encrypted_data, EncryptionService::getUserKeyFromSession());
-                $sharing->encrypted_data = json_decode($decryptedData, true);
-            } catch (\Exception $e) {
-                error_log("Failed to decrypt sharing ID {$sharing->id}: " . $e->getMessage());
-                continue;
-            }
-        }
         return $sharings;
     }
 
@@ -66,27 +57,27 @@ class PasswordSharingService
         $sharedPasswords = [];
         foreach ($sharedRecords as $sharing) {
             try {
-                $password = new PasswordBroker()->findByIdDecrypt($sharing->password_id, EncryptionService::getUserKeyFromSession());
+                $password = (new PasswordBroker())->findByIdDecrypt($sharing->password_id, EncryptionService::getUserKeyFromSession());
 
-                if ($password && $password->user_id === EncryptionService::getUserIDFromSession()) {
-                    $sharedPassword = new PasswordSharing();
-                    $sharedPassword->id = $sharing->id;
-                    $sharedPassword->password_id = $sharing->password_id;
-                    $sharedPassword->owner_id = $sharing->owner_id;
-                    $sharedPassword->shared_with_id = $sharing->shared_with_id;
-                    $sharedPassword->status = $sharing->status;
-                    $sharedPassword->created_at = $sharing->created_at;
-                    $sharedPassword->updated_at = $sharing->updated_at;
-                    $sharedPassword->encrypted_data = json_encode([
+                if ($password && (int)$password->user_id === (int)EncryptionService::getUserIDFromSession()) {
+                    $tempSharing = new PasswordSharing();
+                    $tempSharing->id = $sharing->id;
+                    $tempSharing->password_id = $sharing->password_id;
+                    $tempSharing->owner_id = $sharing->owner_id;
+                    $tempSharing->shared_with_id = $sharing->shared_with_id;
+                    $tempSharing->status = $sharing->status;
+                    $tempSharing->created_at = $sharing->created_at;
+                    $tempSharing->updated_at = $sharing->updated_at;
+
+                    $jsonData = json_encode([
                         "service_name" => $password->service_name,
                         "username" => $password->username,
                         "password" => $password->password
                     ]);
-
-                    $sharedPasswords[] = $sharedPassword;
+                    $tempSharing->encrypted_data = $jsonData;
+                    $sharedPasswords[] = $tempSharing;
                 }
             } catch (\Exception $e) {
-                error_log("Failed to process shared password ID {$sharing->id}: " . $e->getMessage());
                 continue;
             }
         }

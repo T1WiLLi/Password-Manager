@@ -63,6 +63,8 @@ class Dashboard extends SecureController
             'sharedCount' => count($sharedByMe),
             'errors' => $errors,
             'success' => $success,
+            'encryptionService' => new \Models\PasswordManager\Services\EncryptionService(),
+            'userService' => $this->userService
         ]);
     }
 

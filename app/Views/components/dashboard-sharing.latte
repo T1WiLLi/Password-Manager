@@ -59,7 +59,6 @@
                     <thead class="table-light">
                         <tr>
                             <th>Service</th>
-                            <th>Shared With</th>
                             <th>Status</th>
                             <th>Date Shared</th>
                             <th>Actions</th>
@@ -67,24 +66,29 @@
                     </thead>
                     <tbody>
                         {foreach $sharedByMe as $sharing}
-                            {var $data = json_decode($sharing->encrypted_data, true)}
-                            <tr>
-                                <td>{$data['service_name']}</td>
-                                <td>{$userService->getUser($sharing->shared_with_id)->username}</td>
-                                <td>
-                                    <span class="badge bg-{$sharing->status === 'active' ? 'success' : 'warning'}">
-                                        {$sharing->status|capitalize}
-                                    </span>
-                                </td>
-                                <td>{$sharing->created_at|date:'M d, Y'}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger btn-effects revoke-sharing" 
-                                            data-id="{$sharing->id}" 
-                                            data-service="{$data['service_name']}">
-                                        <i class="bi bi-trash"></i> Revoke
-                                    </button>
-                                </td>
-                            </tr>
+                            {var $data = $sharing->getDataAsArray()}
+                            {if $data}
+                                <tr>
+                                    <td>{$data['service_name']|escape}</td>
+                                    <td>
+                                        <span class="badge bg-{$sharing->status === 'active' ? 'success' : 'warning'}">
+                                            {$sharing->status|capitalize}
+                                        </span>
+                                    </td>
+                                    <td>{$sharing->created_at|date:'M d, Y'}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger btn-effects revoke-sharing" 
+                                                data-id="{$sharing->id}" 
+                                                data-service="{$data['service_name']|escape}">
+                                            <i class="bi bi-trash"></i> Revoke
+                                        </button>
+                                    </td>
+                                </tr>
+                            {else}
+                                <tr>
+                                    <td colspan="5" class="text-muted">Unable to decrypt shared password</td>
+                                </tr>
+                            {/if}
                         {/foreach}
                     </tbody>
                 </table>
@@ -111,35 +115,42 @@
                     </thead>
                     <tbody>
                         {foreach $sharedWithMe as $sharing}
-                            <tr>
-                                <td>{$sharing->encrypted_data['service_name']}</td>
-                                <td>{$sharing->encrypted_data['username']}</td>
-                                <td>
-                                    <div class="input-group d-flex gap-2 flex-row justify-content-center align-items-center">
-                                        <input type="text" 
-                                               class="form-control" 
-                                               value="{if in_array($sharing->id, $revealedSharedIds)}{$sharing->encrypted_data['password']}{else}••••••••{/if}" 
-                                               readonly>
-                                        <form action="/dashboard/sharing/toggle-reveal/{$sharing->id}" method="post" class="mb-0">
-                                            <button class="btn btn-outline-secondary btn-effect" type="submit">
-                                                <i class="bi bi-eye{if !in_array($sharing->id, $revealedSharedIds)}-slash{/if}"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-{$sharing->status === 'active' ? 'success' : 'warning'}">
-                                        {$sharing->status|capitalize}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-danger btn-effects delete-sharing" 
-                                            data-id="{$sharing->id}" 
-                                            data-service="{$sharing->encrypted_data['service_name']}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                            {var $data = $sharing->getDecryptedDataAsArray($encryptionService::getUserKeyFromSession())}
+                            {if $data}
+                                <tr>
+                                    <td>{$data['service_name']|escape}</td>
+                                    <td>{$data['username']|escape}</td>
+                                    <td>
+                                        <div class="input-group d-flex gap-2 flex-row justify-content-center align-items-center">
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   value="{if in_array($sharing->id, $revealedSharedIds)}{$data['password']|escape}{else}••••••••{/if}" 
+                                                   readonly>
+                                            <form action="/dashboard/sharing/toggle-reveal/{$sharing->id}" method="post" class="mb-0">
+                                                <button class="btn btn-outline-secondary btn-effect" type="submit">
+                                                    <i class="bi bi-eye{if !in_array($sharing->id, $revealedSharedIds)}-slash{/if}"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{$sharing->status === 'active' ? 'success' : 'warning'}">
+                                            {$sharing->status|capitalize}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger btn-effects delete-sharing" 
+                                                data-id="{$sharing->id}" 
+                                                data-service="{$data['service_name']|escape}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            {else}
+                                <tr>
+                                    <td colspan="5" class="text-muted">Unable to decrypt shared password</td>
+                                </tr>
+                            {/if}
                         {/foreach}
                     </tbody>
                 </table>
