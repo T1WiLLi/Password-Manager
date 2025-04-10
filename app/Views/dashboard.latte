@@ -34,7 +34,7 @@
         {if $success}
             <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
                 <p class="mb-0">{$success}</p>
-                <button type="button"泼 class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {/if}
 
@@ -134,72 +134,73 @@
                             </div>
                             <div class="stat-info">
                                 <h4 class="h6 mb-0">Shared Passwords</h4>
-                                <p class="h3 mb-0 fw-bold">15% <small class="text-muted">(4 items)</small></p>
+                                <p class="h3 mb-0 fw-bold">{$sharedCount} <small class="text-muted">({($sharedCount / max(1, $totalPasswords) * 100)|round}%)</small></p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="row g-4 mt-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="h5 mb-0">Recent Activity</h3>
-                            <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="activity-timeline p-3">
-                                <div class="activity-item d-flex pb-3 mb-3 border-bottom">
-                                    <div class="activity-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
-                                        <i class="bi bi-key-fill"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="mb-1">Password Updated</h6>
-                                            <span class="text-muted small">Today, 10:42 AM</span>
-                                        </div>
-                                        <p class="mb-0 text-muted">You updated your Netflix password</p>
-                                    </div>
+        <!-- Recent Activity Card - Now part of the main structure -->
+        <div class="row g-4 mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Recent Activity</h3>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="activity-timeline p-3">
+                            <div class="activity-item d-flex pb-3 mb-3 border-bottom">
+                                <div class="activity-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                    <i class="bi bi-key-fill"></i>
                                 </div>
-                                
-                                <div class="activity-item d-flex pb-3 mb-3 border-bottom">
-                                    <div class="activity-icon bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
-                                        <i class="bi bi-shield-check"></i>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-1">Password Updated</h6>
+                                        <span class="text-muted small">Today, 10:42 AM</span>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="mb-1">Security Check Completed</h6>
-                                            <span class="text-muted small">Yesterday, 3:15 PM</span>
-                                        </div>
-                                        <p class="mb-0 text-muted">Automatic security check completed</p>
-                                    </div>
+                                    <p class="mb-0 text-muted">You updated your Netflix password</p>
                                 </div>
-                                
-                                <div class="activity-item d-flex pb-3 mb-3 border-bottom">
-                                    <div class="activity-icon bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
-                                        <i class="bi bi-share"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="mb-1">Password Shared</h6>
-                                            <span class="text-muted small">Apr 3, 11:20 AM</span>
-                                        </div>
-                                        <p class="mb-0 text-muted">You shared "Wifi Password" with Alex</p>
-                                    </div>
+                            </div>
+                            
+                            <div class="activity-item d-flex pb-3 mb-3 border-bottom">
+                                <div class="activity-icon bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                    <i class="bi bi-shield-check"></i>
                                 </div>
-                                
-                                <div class="activity-item d-flex">
-                                    <div class="activity-icon bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
-                                        <i class="bi bi-person-plus"></i>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-1">Security Check Completed</h6>
+                                        <span class="text-muted small">Yesterday, 3:15 PM</span>
                                     </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="mb-1">New Device Login</h6>
-                                            <span class="text-muted small">Apr 2, 8:55 PM</span>
-                                        </div>
-                                        <p class="mb-0 text-muted">New login from iPhone 13 in San Francisco</p>
+                                    <p class="mb-0 text-muted">Automatic security check completed</p>
+                                </div>
+                            </div>
+                            
+                            <div class="activity-item d-flex pb-3 mb-3 border-bottom">
+                                <div class="activity-icon bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                    <i class="bi bi-share"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-1">Password Shared</h6>
+                                        <span class="text-muted small">Apr 3, 11:20 AM</span>
                                     </div>
+                                    <p class="mb-0 text-muted">You shared "Wifi Password" with Alex</p>
+                                </div>
+                            </div>
+                            
+                            <div class="activity-item d-flex">
+                                <div class="activity-icon bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                    <i class="bi bi-person-plus"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="mb-1">New Device Login</h6>
+                                        <span class="text-muted small">Apr 2, 8:55 PM</span>
+                                    </div>
+                                    <p class="mb-0 text-muted">New login from iPhone 13 in San Francisco</p>
                                 </div>
                             </div>
                         </div>

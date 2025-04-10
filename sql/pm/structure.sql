@@ -42,7 +42,7 @@ CREATE TABLE passwords (
     password TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_used TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_passwords_user_id ON passwords (user_id);
@@ -99,7 +99,7 @@ CREATE TABLE password_sharing (
     encrypted_data TEXT NOT NULL,
     status sharing_status NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_password_sharing_owner_id ON password_sharing (owner_id);

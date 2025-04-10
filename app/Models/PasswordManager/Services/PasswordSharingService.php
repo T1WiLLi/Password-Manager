@@ -74,7 +74,7 @@ class PasswordSharingService
                     $sharedPassword->password_id = $sharing->password_id;
                     $sharedPassword->owner_id = $sharing->owner_id;
                     $sharedPassword->shared_with_id = $sharing->shared_with_id;
-                    $sharedPassword->sharing_status = $sharing->sharing_status;
+                    $sharedPassword->status = $sharing->status;
                     $sharedPassword->created_at = $sharing->created_at;
                     $sharedPassword->updated_at = $sharing->updated_at;
                     $sharedPassword->encrypted_data = json_encode([
@@ -103,13 +103,13 @@ class PasswordSharingService
         }
 
         foreach ($sharings as $sharing) {
-            if ($sharing->sharing_status === "pending") {
+            if ($sharing->status === "pending") {
                 try {
                     $decryptedData = Cryptography::decrypt($sharing->encrypted_data);
                     $userEncryptedData = EncryptionService::encrypt($decryptedData, EncryptionService::getUserKeyFromSession());
 
                     $sharing->encrypted_data = $userEncryptedData;
-                    $sharing->sharing_status = "active";
+                    $sharing->status = "active";
 
                     if (!new PasswordSharingBroker()->save($sharing)) {
                         $success = false;
@@ -123,11 +123,16 @@ class PasswordSharingService
         return $success;
     }
 
-    public function revokeSharing(int $sharingID, int $ownerID): bool
+    public function deleteSharing(int $sharingID): bool
+    {
+        return new PasswordSharingBroker()->delete($sharingID);
+    }
+
+    public function revokeSharing(int $sharingID): bool
     {
         $sharing = PasswordSharing::build(new PasswordSharingBroker()->findById($sharingID));
 
-        if (!$sharing || $sharing->owner_id !== $ownerID) {
+        if (!$sharing || $sharing->owner_id !== EncryptionService::getUserIDFromSession()) {
             return false;
         }
 
@@ -158,8 +163,8 @@ class PasswordSharingService
         );
 
         $sharing->encrypted_data = $encryptedData;
-        $sharing->sharing_status = "pending";
-        $sharing->updated_at = date('Y-m-s H:i:s');
+        $sharing->status = "pending";
+        $sharing->updated_at = date('Y-m-d H:i:s');
 
         if (!new PasswordSharingBroker()->save($sharing)) {
             throw new \Exception("Failed to update sharing with ID: $sharing->id");

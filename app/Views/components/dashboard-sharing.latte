@@ -1,11 +1,239 @@
 {block sharing}
-<div id="component-sharing" data-component>
+<div id="component-sharing" data-component style="display: none;">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 mb-0 text-primary fw-bold">Sharing center</h2>
-        <button class="btn btn-primary btn-effects d-flex align-items-center gap-2 shadow-sm">
-            <i class="bi bi-plus-lg" id="toggleIcon"></i><span id="toggleText">Share Password</span>
+        <h2 class="h4 mb-0 text-primary fw-bold">Sharing Center</h2>
+        <button class="btn btn-primary btn-effects d-flex align-items-center gap-2 shadow-sm" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#sharePasswordForm" 
+                aria-expanded="false" 
+                aria-controls="sharePasswordForm">
+            <i class="bi bi-plus-lg"></i> Share Password
         </button>
     </div>
-    <p class="text-muted mb-4">View and manage shared passwords with other users.</p>
+
+    <div class="collapse mb-4" id="sharePasswordForm">
+        <form action="/dashboard/share" method="post" class="card p-4 shadow-sm border-0 animate-fade">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="password_id" class="form-label">Select Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="bi bi-shield-lock text-primary"></i>
+                        </span>
+                        <select class="form-select border-start-0" id="password_id" name="password_id" required>
+                            <option value="">Choose a password...</option>
+                            {foreach $passwords as $password}
+                                <option value="{$password->id}">{$password->service_name}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="email" class="form-label">Recipient Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="bi bi-envelope text-primary"></i>
+                        </span>
+                        <input type="email" class="form-control border-start-0" id="email" name="email" required placeholder="Enter recipient's email">
+                    </div>
+                </div>
+                <div class="col-12 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-effects">
+                        <i class="bi bi-share me-2"></i>Share
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-effects" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#sharePasswordForm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="mb-5">
+        <h3 class="h5 mb-3">Passwords I've Shared</h3>
+        {if count($sharedByMe) > 0}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Service</th>
+                            <th>Shared With</th>
+                            <th>Status</th>
+                            <th>Date Shared</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {foreach $sharedByMe as $sharing}
+                            {var $data = json_decode($sharing->encrypted_data, true)}
+                            <tr>
+                                <td>{$data['service_name']}</td>
+                                <td>{$userService->getUser($sharing->shared_with_id)->username}</td>
+                                <td>
+                                    <span class="badge bg-{$sharing->status === 'active' ? 'success' : 'warning'}">
+                                        {$sharing->status|capitalize}
+                                    </span>
+                                </td>
+                                <td>{$sharing->created_at|date:'M d, Y'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger btn-effects revoke-sharing" 
+                                            data-id="{$sharing->id}" 
+                                            data-service="{$data['service_name']}">
+                                        <i class="bi bi-trash"></i> Revoke
+                                    </button>
+                                </td>
+                            </tr>
+                        {/foreach}
+                    </tbody>
+                </table>
+            </div>
+            <button class="btn btn-outline-danger btn-effects revoke-all-sharing mt-3">Revoke All Sharings</button>
+        {else}
+            <p class="text-muted">You haven't shared any passwords yet.</p>
+        {/if}
+    </div>
+
+    <div>
+        <h3 class="h5 mb-3">Passwords Shared With Me</h3>
+        {if count($sharedWithMe) > 0}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Service</th>
+                            <th>Username</th>
+                            <th>Password</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {foreach $sharedWithMe as $sharing}
+                            <tr>
+                                <td>{$sharing->encrypted_data['service_name']}</td>
+                                <td>{$sharing->encrypted_data['username']}</td>
+                                <td>
+                                    <div class="input-group d-flex gap-2 flex-row justify-content-center align-items-center">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               value="{if in_array($sharing->id, $revealedSharedIds)}{$sharing->encrypted_data['password']}{else}••••••••{/if}" 
+                                               readonly>
+                                        <form action="/dashboard/sharing/toggle-reveal/{$sharing->id}" method="post" class="mb-0">
+                                            <button class="btn btn-outline-secondary btn-effect" type="submit">
+                                                <i class="bi bi-eye{if !in_array($sharing->id, $revealedSharedIds)}-slash{/if}"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{$sharing->status === 'active' ? 'success' : 'warning'}">
+                                        {$sharing->status|capitalize}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger btn-effects delete-sharing" 
+                                            data-id="{$sharing->id}" 
+                                            data-service="{$sharing->encrypted_data['service_name']}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {/foreach}
+                    </tbody>
+                </table>
+            </div>
+        {else}
+            <p class="text-muted">No passwords have been shared with you yet.</p>
+        {/if}
+    </div>
+
+    <div class="modal fade" id="revokeSharingModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Revoke</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Revoke sharing for <span id="revokeServiceName"></span>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-effects" data-bs-dismiss="modal">Cancel</button>
+                    <form id="revokeSharingForm" method="post">
+                        <button type="submit" class="btn btn-danger btn-effects">Revoke</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteSharingModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Remove shared password for <span id="deleteSharedServiceName"></span>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-effects" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteSharingForm" method="post">
+                        <button type="submit" class="btn btn-danger btn-effects">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="revokeAllModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Revoke All</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to revoke all shared passwords?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-effects" data-bs-dismiss="modal">Cancel</button>
+                    <form action="/dashboard/sharing/revoke-all" method="post">
+                        <button type="submit" class="btn btn-danger btn-effects">Revoke All</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script n:syntax=off>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.revoke-sharing').forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('revokeSharingModal'));
+            document.getElementById('revokeServiceName').textContent = this.dataset.service;
+            document.getElementById('revokeSharingForm').action = `/dashboard/sharing/revoke/${this.dataset.id}`;
+            modal.show();
+        });
+    });
+
+    document.querySelectorAll('.delete-sharing').forEach(button => {
+        button.addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('deleteSharingModal'));
+            document.getElementById('deleteSharedServiceName').textContent = this.dataset.service;
+            document.getElementById('deleteSharingForm').action = `/dashboard/sharing/delete/${this.dataset.id}`;
+            modal.show();
+        });
+    });
+
+    document.querySelector('.revoke-all-sharing').addEventListener('click', function() {
+        const modal = new bootstrap.Modal(document.getElementById('revokeAllModal'));
+        modal.show();
+    });
+});
+</script>
 {/block}

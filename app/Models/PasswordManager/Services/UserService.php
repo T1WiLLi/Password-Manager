@@ -15,6 +15,16 @@ class UserService
         return new UserBroker()->findByIdDecrypt($userId, EncryptionService::getUserKeyFromSession());
     }
 
+    public function existsByEmail(string $email): bool
+    {
+        return new UserBroker()->existsByEmail($email);
+    }
+
+    public function getIdByEmail(string $email): int
+    {
+        return new UserBroker()->findByEmail($email)->id;
+    }
+
     public function updateUser(Form $form): User
     {
         $user = new UserBroker()->findByIdDecrypt($form->getValue("id"), EncryptionService::getUserKeyFromSession());

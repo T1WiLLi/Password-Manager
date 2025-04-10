@@ -31,7 +31,7 @@ class PasswordService
     {
         PasswordValidator::validatePassword($form);
 
-        if (new PasswordBroker()->existsByServiceAndUsername($form->getValue("service_name"), $form->getValue("username"))) {
+        if (new PasswordBroker()->existsByServiceAndUsername(EncryptionService::encrypt($form->getValue("service_name"), EncryptionService::getUserKeyFromSession()), EncryptionService::encrypt($form->getValue("username"), EncryptionService::getUserKeyFromSession()))) {
             throw new \Exception("Password already exists for this service and username.");
         }
 

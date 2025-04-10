@@ -163,7 +163,6 @@
     border-radius: 0.5rem;
     padding: 0.8rem 1.6rem;
     font-weight: 500;
-    transition: var(--transition);
 }
 
 .btn-primary {
@@ -174,7 +173,6 @@
 .btn-primary:hover {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
-    transform: translateY(-3px);
 }
 
 .btn-light {
@@ -184,7 +182,6 @@
 
 .btn-light:hover {
     background-color: white;
-    transform: translateY(-3px);
 }
 
 .btn-effects {

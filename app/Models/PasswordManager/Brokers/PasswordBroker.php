@@ -14,8 +14,8 @@ class PasswordBroker extends Broker
 
     public function existsByServiceAndUsername(string $serviceName, string $username): bool
     {
-        $result = $this->selectSingle("SELECT * FROM {$this->table} WHERE service_name = ? AND username = ?", [$serviceName, $username]);
-        return !$result ? false : true;
+        $result = $this->selectSingle("SELECT 1 FROM {$this->table} WHERE service_name = ? AND username = ? LIMIT 1", [$serviceName, $username]);
+        return $result !== null && $result !== false;
     }
 
     public function countByUserId(int $userID): int

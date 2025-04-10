@@ -13,8 +13,8 @@ class PasswordSharingBroker extends Broker
 
     public function sharePassword(int $passwordID, int $ownerID, int $sharedUserID, string $encryptedData, string $status = "pending"): int
     {
-        $sql = "INSERT INTO {$this->table} (password_id, owner_id, shared_with_id, encrypted_data, sharing_status, created_at, updated_at) 
-                VALUES (?, ?, ?, ?, ? NOW(), NOW()) RETURNING id";
+        $sql = "INSERT INTO {$this->table} (password_id, owner_id, shared_with_id, encrypted_data, status, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ?, NOW(), NOW()) RETURNING id";
         $result = $this->query($sql, [$passwordID, $ownerID, $sharedUserID, $encryptedData, $status]);
         return isset($result->id) ? (int) $result->id : 0;
     }
@@ -23,7 +23,7 @@ class PasswordSharingBroker extends Broker
     {
         $sql = "SELECT * FROM {$this->table} WHERE password_id = ? ORDER BY created_at DESC";
         $result = $this->select($sql, [$passwordID]);
-        return !$result ? PasswordSharing::buildArray($result) : [];
+        return $result ? PasswordSharing::buildArray($result) : [];
     }
 
     public function findByOwnerID(int $ownerID, ?string $status = null): array
@@ -52,6 +52,6 @@ class PasswordSharingBroker extends Broker
             $params[] = $status;
         }
         $result = $this->select($sql, $params);
-        return !$result ? PasswordSharing::buildArray($result) : [];
+        return $result ? PasswordSharing::buildArray($result) : [];
     }
 }
