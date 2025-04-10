@@ -27,16 +27,9 @@ class PasswordBroker extends Broker
     public function countDuplicatePasswords(int $userID, string $encryptionKey): int
     {
         $passwords = $this->findByUserId($userID, $encryptionKey);
-        $uniquePasswords = [];
-        $count = 0;
-        foreach ($passwords as $password) {
-            if (in_array($password->service_name, $uniquePasswords)) {
-                $count++;
-            } else {
-                $uniquePasswords[] = $password->service_name;
-            }
-        }
-        return $count;
+        $passwordValues = array_map(fn($password) => $password->password, $passwords);
+        $duplicates = array_filter(array_count_values($passwordValues), fn($count) => $count > 1);
+        return array_sum($duplicates);
     }
 
     public function findByIdDecrypt(int $id, string $encryptionKey): ?Password

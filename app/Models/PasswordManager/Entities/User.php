@@ -12,6 +12,7 @@ class User extends Entity
     public string $email_hash;
     public string $password;
     public string $salt;
+    public string $public_key;
     public bool $is_verified;
     public string $created_at;
     public string $updated_at;

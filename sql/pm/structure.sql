@@ -1,6 +1,6 @@
 CREATE TYPE login_status AS ENUM ('success', 'failure');
-
 CREATE TYPE mfa_method_type AS ENUM ('email', 'sms', 'authenticator');
+CREATE TYPE sharing_status AS ENUM ('active', 'pending');
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -43,7 +43,6 @@ CREATE TABLE passwords (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_used TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT
 );
 
 CREATE INDEX idx_passwords_user_id ON passwords (user_id);
@@ -97,9 +96,10 @@ CREATE TABLE password_sharing (
     password_id INT NOT NULL REFERENCES passwords(id) ON DELETE CASCADE,
     owner_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     shared_with_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    encrypted_data TEXT NOT NULL,
+    status sharing_status NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status TEXT DEFAULT 'active' CHECK (status IN ('active', 'revoked'))
 );
 
 CREATE INDEX idx_password_sharing_owner_id ON password_sharing (owner_id);

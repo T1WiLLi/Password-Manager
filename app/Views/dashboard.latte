@@ -86,7 +86,7 @@
                                 ['icon' => 'exclamation-triangle', 'label' => 'Security Alerts', 'bg' => 'danger'],
                             ] as $action}
                                 <div class="col-6">
-                                    <div class="action-item d-flex align-items-center p-2 rounded hover-glow transition">
+                                    <div class="action-item d-flex align-items-center p-2 rounded hover-glow transition" data-action="{strtolower(str_replace(' ', '-', $action['label']))}">
                                         <div class="action-icon bg-{$action['bg']} rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center">
                                             <i class="bi bi-{$action['icon']}"></i>
                                         </div>

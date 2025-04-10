@@ -13,6 +13,7 @@ export default class Application {
         this.#initializeFormValidation();
         new DateTimeDisplay("date-time");
         this.#setupComponentSwitching();
+        this.#setupQuickActions();
     }
 
     #enableTooltips() {
@@ -73,6 +74,30 @@ export default class Application {
         const defaultLink = document.getElementById("passwords-link");
         if (defaultLink) {
             switchComponent(defaultLink, "component-passwords");
+        }
+
+        return switchComponent;
+    }
+
+    #setupQuickActions() {
+        const switchComponent = this.#setupComponentSwitching();
+
+        const addPasswordAction = document.querySelector('.action-item[data-action="add-password"]');
+        if (addPasswordAction) {
+            addPasswordAction.addEventListener('click', () => {
+                const passwordsLink = document.getElementById('passwords-link');
+                if (passwordsLink) {
+                    switchComponent(passwordsLink, 'component-passwords');
+                }
+
+                const addPasswordForm = document.getElementById('addPasswordForm');
+                if (addPasswordForm) {
+                    const collapse = new bootstrap.Collapse(addPasswordForm, {
+                        toggle: false
+                    });
+                    collapse.show();
+                }
+            });
         }
     }
 }

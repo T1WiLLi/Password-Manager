@@ -36,16 +36,6 @@ class PasswordSharingBroker extends Broker
         return $this->findByColumn('shared_with_id', $sharedUserID, $status);
     }
 
-    public function updateStatus(int $id, string $status): bool
-    {
-        $password = PasswordSharing::build($this->findById($id));
-        if (!$password) {
-            return false;
-        }
-        $password->status = $status;
-        return $this->save($password);
-    }
-
     public function deleteByPasswordId(int $passwordId): bool
     {
         $sql = "DELETE FROM password_sharing WHERE password_id = ?";
