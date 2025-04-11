@@ -3,6 +3,7 @@
 namespace Models\PasswordManager\Brokers;
 
 use Models\PasswordManager\Entities\PasswordSharing;
+use stdClass;
 
 class PasswordSharingBroker extends Broker
 {
@@ -24,6 +25,13 @@ class PasswordSharingBroker extends Broker
         $sql = "SELECT * FROM {$this->table} WHERE password_id = ? ORDER BY created_at DESC";
         $result = $this->select($sql, [$passwordID]);
         return $result ? PasswordSharing::buildArray($result) : [];
+    }
+
+    public function findByPasswordIdAndSharedUserId(int $passwordID, int $sharedUserID): ?stdClass
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE password_id = ? AND shared_with_id = ?";
+        $result = $this->selectSingle($sql, [$passwordID, $sharedUserID]);
+        return $result;
     }
 
     public function findByOwnerID(int $ownerID, ?string $status = null): array

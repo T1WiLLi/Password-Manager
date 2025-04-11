@@ -1,0 +1,70 @@
+{block content}
+<div class="verification-container">
+    <h1>{$title}</h1>
+    
+    {if isset($error)}
+        <div class="error-message">{$error}</div>
+        
+        {if $expired}
+            <p>Your verification link has expired. Please enter your email to resend the verification link:</p>
+            <form method="post" action="/resend-verification">
+                <input type="hidden" name="user_id" value="{$userId}">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" 
+                           name="email" 
+                           id="email" 
+                           required 
+                           placeholder="Enter your email">
+                </div>
+                <button type="submit" class="resend-button">Resend Verification Email</button>
+            </form>
+        {else}
+            <p>The verification link is invalid or has already been used.</p>
+            <a href="/register" class="button">Register Again</a>
+        {/if}
+    {else}
+        <p>Verifying your email... If you are not redirected, please click the link in your email again.</p>
+    {/if}
+</div>
+{/block}
+
+{block styles}
+<style>
+    .verification-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+    }
+    
+    .error-message {
+        color: red;
+        margin-bottom: 15px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    input[type="email"] {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+    }
+    
+    .resend-button, .button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+    }
+    
+    .resend-button:hover, .button:hover {
+        background-color: #0056b3;
+    }
+</style>
+{/block}

@@ -19,6 +19,10 @@ class PasswordSharingService
             throw new \Exception("Invalid password or ownership.");
         }
 
+        if ($this->isPasswordAlreadySharedWithUser($passwordID, $sharedUserID)) {
+            throw new \Exception("This password is already shared with the specified user.");
+        }
+
         $encryptedData = Cryptography::encrypt(
             json_encode([
                 "service_name" => $password->service_name,
@@ -123,7 +127,7 @@ class PasswordSharingService
     {
         $sharing = PasswordSharing::build(new PasswordSharingBroker()->findById($sharingID));
 
-        if (!$sharing || $sharing->owner_id !== EncryptionService::getUserIDFromSession()) {
+        if (!$sharing || $sharing->owner_id !== (int)EncryptionService::getUserIDFromSession()) {
             return false;
         }
 
@@ -134,10 +138,14 @@ class PasswordSharingService
     {
         $success = true;
         $sharings = new PasswordSharingBroker()->findByOwnerID(EncryptionService::getUserIDFromSession());
+
+        if (empty($sharings)) {
+            return true;
+        }
+
         foreach ($sharings as $sharing) {
-            $success = $success && $this->revokeSharing($sharing->id, EncryptionService::getUserIDFromSession());
-            if (!$success) {
-                break;
+            if (!$this->revokeSharing($sharing->id)) {
+                $success = false;
             }
         }
         return $success;
@@ -160,5 +168,11 @@ class PasswordSharingService
         if (!new PasswordSharingBroker()->save($sharing)) {
             throw new \Exception("Failed to update sharing with ID: $sharing->id");
         }
+    }
+
+    private function isPasswordAlreadySharedWithUser(int $passwordID, int $sharedWithUserID): bool
+    {
+        $sharings = new PasswordSharingBroker()->findByPasswordIdAndSharedUserId($passwordID, $sharedWithUserID);
+        return !empty($sharings);
     }
 }

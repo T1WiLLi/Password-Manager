@@ -50,4 +50,9 @@ class UserService
         new UserBroker()->update($user, $newEncryptionKey);
         return $user;
     }
+
+    public function isUserVerified(int $userID): bool
+    {
+        return new UserBroker()->isUserVerified($userID);
+    }
 }

@@ -1,8 +1,12 @@
 import FormValidator from "./FormValidator.js";
 import DateTimeDisplay from "./DateTimeDisplay.js";
+import PasswordSearch from "./PasswordSearch.js";
+import ComponentManager from "./ComponentManager.js";
 
 export default class Application {
     #configurations;
+    #passwordSearch;
+    #componentManager;
 
     constructor(configurations) {
         this.#configurations = configurations;
@@ -12,7 +16,8 @@ export default class Application {
         this.#enableTooltips();
         this.#initializeFormValidation();
         new DateTimeDisplay("date-time");
-        this.#setupComponentSwitching();
+        this.#initializePasswordSearch();
+        this.#initializeComponentManager();
         this.#setupQuickActions();
     }
 
@@ -25,77 +30,49 @@ export default class Application {
         if (document.getElementById("login-form")) {
             new FormValidator("login-form");
         }
-
         if (document.getElementById("register-form")) {
             new FormValidator("register-form");
         }
     }
 
-    #setupComponentSwitching() {
+    #initializePasswordSearch() {
+        if (document.getElementById("passwordSearch")) {
+            this.#passwordSearch = new PasswordSearch("passwordSearch", ".table tbody");
+            const resetButton = document.querySelector('.reset-search');
+            if (resetButton) {
+                resetButton.addEventListener('click', () => {
+                    this.#passwordSearch.resetSearch();
+                });
+            }
+        }
+    }
+
+    #initializeComponentManager() {
         const tabs = {
             'passwords-link': 'component-passwords',
             'sharing-link': 'component-sharing',
             'groups-link': 'component-groups'
         };
-
-        const hideSpinner = () => {
-            const spinner = document.querySelector('.content-placeholder');
-            if (spinner) {
-                spinner.style.display = 'none';
-            }
-        };
-
-        const switchComponent = (link, componentId) => {
-            document.querySelectorAll(".dashboard-nav .nav-link").forEach(nav => {
-                nav.classList.remove("active");
-            });
-
-            link.classList.add("active");
-
-            document.querySelectorAll("[data-component]").forEach(comp => {
-                comp.style.display = "none";
-            });
-
-            const target = document.getElementById(componentId);
-            if (target) {
-                target.style.display = "block";
-                hideSpinner();
-            }
-        };
-
-        Object.entries(tabs).forEach(([linkId, componentId]) => {
-            const link = document.getElementById(linkId);
-            link?.addEventListener("click", (e) => {
-                e.preventDefault();
-                switchComponent(link, componentId);
-            });
+        this.#componentManager = new ComponentManager({
+            tabs: tabs,
+            passwordSearch: this.#passwordSearch
         });
-
-        const defaultLink = document.getElementById("passwords-link");
-        if (defaultLink) {
-            switchComponent(defaultLink, "component-passwords");
-        }
-
-        return switchComponent;
     }
 
     #setupQuickActions() {
-        const switchComponent = this.#setupComponentSwitching();
-
         const addPasswordAction = document.querySelector('.action-item[data-action="add-password"]');
         if (addPasswordAction) {
             addPasswordAction.addEventListener('click', () => {
-                const passwordsLink = document.getElementById('passwords-link');
-                if (passwordsLink) {
-                    switchComponent(passwordsLink, 'component-passwords');
-                }
-
+                this.#componentManager.switchToComponentById('component-passwords');
                 const addPasswordForm = document.getElementById('addPasswordForm');
                 if (addPasswordForm) {
                     const collapse = new bootstrap.Collapse(addPasswordForm, {
                         toggle: false
                     });
                     collapse.show();
+                    if (this.#passwordSearch) {
+                        this.#passwordSearch.resetSearch();
+                    }
                 }
             });
         }

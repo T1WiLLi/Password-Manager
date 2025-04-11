@@ -17,6 +17,13 @@
                     <h2 class="card-title text-center mb-0">{$title}</h2>
                 </div>
 
+                {if Flash::hasSuccess()}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {Flash::readSuccess()}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {/if}
+
                 {if isset($errors['general'])}
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         {$errors['general']}

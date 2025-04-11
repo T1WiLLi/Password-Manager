@@ -58,6 +58,17 @@ class UserBroker extends Broker
         return $this->save($encryptedUser);
     }
 
+    public function markAsVerified(int $userID): void
+    {
+        $this->query("UPDATE {$this->table} SET is_verified = TRUE WHERE id = ?", [$userID]);
+    }
+
+    public function isUserVerified(int $userID): bool
+    {
+        $result = $this->selectSingle("SELECT is_verified FROM {$this->table} WHERE id = ?", [$userID]);
+        return $result ? $result->is_verified : false;
+    }
+
     private function encryptUser(User $user, string $encryptionKey): User
     {
         if ($user->username) {

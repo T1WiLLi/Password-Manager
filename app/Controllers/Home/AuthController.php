@@ -5,6 +5,9 @@ namespace Controllers\Home;
 use Controllers\Controller;
 use Models\Exceptions\FormException;
 use Models\PasswordManager\Services\AuthentificationService;
+use Models\PasswordManager\Services\EmailVerificationService;
+use Models\PasswordManager\Brokers\EmailVerificationBroker;
+use Models\PasswordManager\Services\UserService;
 use Zephyrus\Application\Flash;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router\Get;
@@ -13,10 +16,12 @@ use Zephyrus\Network\Router\Post;
 class AuthController extends Controller
 {
     private AuthentificationService $authService;
+    private EmailVerificationService $emailVerificationService;
 
     public function __construct()
     {
         $this->authService = new AuthentificationService();
+        $this->emailVerificationService = new EmailVerificationService();
     }
 
     #[Get('/login')]
@@ -24,7 +29,8 @@ class AuthController extends Controller
     {
         return $this->render('login', [
             'title' => 'Login',
-            'errors' => []
+            'errors' => [],
+            'success' => $this->request->getParameter('success')
         ]);
     }
 
@@ -37,9 +43,22 @@ class AuthController extends Controller
             $form->addFields([
                 'ipAddress' => $_SERVER['REMOTE_ADDR'],
                 'userAgent' => $_SERVER['HTTP_USER_AGENT'],
-                'location' => null
+                'location' => null // Use a geolocation service to get the user's location
             ]);
             $user = $this->authService->login($form);
+
+            if (!new UserService()->isUserVerified($user->id)) {
+                $existingVerification = (new EmailVerificationBroker())->findByUserID($user->id);
+                if (!$existingVerification) {
+                    $this->emailVerificationService->createVerification($user->id, $user->email);
+                }
+                $errors['general'] = 'Please verify your email before logging in. Check your inbox for the verification link.';
+                return $this->render('login', [
+                    'title' => 'Login',
+                    'errors' => $errors
+                ]);
+            }
+
             Flash::success("Login successful. Welcome, {$user->first_name}!");
             return $this->redirect('/dashboard');
         } catch (FormException $e) {
@@ -68,9 +87,13 @@ class AuthController extends Controller
         $errors = [];
         try {
             $form = $this->buildForm();
-            $this->authService->register($form);
-            Flash::success("Registration successful. Welcome, {$form->getValue("first_name")}!");
-            return $this->redirect('/dashboard');
+            $user = $this->authService->register($form);
+
+            if ($this->emailVerificationService->createVerification($user->id, $form->getValue('email'))) {
+                return $this->redirect('/login', ['success' => "Registration successful. Please check your email to verify your account, {$form->getValue('first_name')}!"]);
+            }
+
+            throw new \Exception('Failed to send verification email');
         } catch (FormException $e) {
             $errors = $e->getForm()->getErrorMessages();
         } catch (\Exception $e) {
