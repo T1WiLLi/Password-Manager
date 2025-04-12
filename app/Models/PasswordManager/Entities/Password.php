@@ -14,4 +14,5 @@ class Password extends Entity
     public string $created_at;
     public ?string $last_used = null;
     public string $updated_at;
+    public bool $isDuplicate = false;
 }

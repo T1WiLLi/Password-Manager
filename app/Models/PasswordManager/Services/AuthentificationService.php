@@ -2,7 +2,7 @@
 
 namespace Models\PasswordManager\Services;
 
-use Models\PasswordManager\Brokers\LoginAttempsBroker;
+use Models\PasswordManager\Brokers\LoginAttemptsBroker;
 use Models\PasswordManager\Brokers\UserBroker;
 use Models\PasswordManager\Entities\LoginAttempt;
 use Models\PasswordManager\Entities\User;
@@ -62,7 +62,7 @@ class AuthentificationService
 
         $status = $authenticatedUser ? "success" : "failure";
 
-        new LoginAttempsBroker()->save($this->generateLoginAttemps($userID, $ipAddress, $userAgent, $status, $location));
+        new LoginAttemptsBroker()->save($this->generateLoginAttemps($userID, $ipAddress, $userAgent, $status, $location));
 
         if (!$authenticatedUser) {
             throw new \Exception("Invalid email or password.");

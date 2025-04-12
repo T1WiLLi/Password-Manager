@@ -13,8 +13,48 @@ class PasswordService
 {
     public function getAllPasswords($userID): array
     {
-        $passwords = new PasswordBroker()->findByUserId($userID, EncryptionService::getUserKeyFromSession());
+        $passwords = (new PasswordBroker())->findByUserId($userID, EncryptionService::getUserKeyFromSession());
+
+        $passwordValues = [];
+        $duplicates = [];
+
+        foreach ($passwords as $password) {
+            $passValue = $password->password;
+            if (!isset($passwordValues[$passValue])) {
+                $passwordValues[$passValue] = [];
+            }
+            $passwordValues[$passValue][] = $password->id;
+        }
+
+        foreach ($passwordValues as $passValue => $ids) {
+            if (count($ids) > 1) {
+                foreach ($ids as $id) {
+                    $duplicates[$id] = true;
+                }
+            }
+        }
+
+        foreach ($passwords as $password) {
+            $password->isDuplicate = isset($duplicates[$password->id]);
+        }
+
         return $passwords;
+    }
+
+    public function getAllPasswordsWithStrength($userID): array
+    {
+        $passwords = $this->getAllPasswords($userID);
+        foreach ($passwords as $password) {
+            $strengthInfo = $this->calculatePasswordStrength($password->password);
+            $password->strength = $strengthInfo['strength'];
+            $password->entropy = $strengthInfo['entropy'];
+        }
+        return array_map(fn($p) => [
+            'service_name' => $p->service_name,
+            'username' => $p->username,
+            'strength' => $p->strength,
+            'entropy' => $p->entropy
+        ], $passwords);
     }
 
     public function getPasswordCountByUserId(int $userID): int
@@ -76,5 +116,31 @@ class PasswordService
                 }
             }
         }
+    }
+
+    private function calculatePasswordStrength(string $password): array
+    {
+        $length = strlen($password);
+        $charset = 0;
+
+        if (preg_match('/[a-z]/', $password)) $charset += 26;
+        if (preg_match('/[A-Z]/', $password)) $charset += 26;
+        if (preg_match('/[0-9]/', $password)) $charset += 10;
+        if (preg_match('/[^a-zA-Z0-9]/', $password)) $charset += 32;
+
+        $entropy = $length * ($charset > 0 ? log($charset, 2) : 0);
+
+        if ($entropy >= 85) {
+            $strength = 'Strong';
+        } elseif ($entropy >= 75) {
+            $strength = 'Medium';
+        } else {
+            $strength = 'Weak';
+        }
+
+        return [
+            'strength' => $strength,
+            'entropy' => $entropy
+        ];
     }
 }

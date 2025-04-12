@@ -5,7 +5,10 @@ namespace Controllers\Home;
 use Controllers\SecureController;
 use Models\PasswordManager\Services\PasswordService;
 use Models\Exceptions\FormException;
+use Models\PasswordManager\Services\EncryptionService;
 use Models\PasswordManager\Services\PasswordSharingService;
+use Models\PasswordManager\Services\PwnedApiService;
+use Models\PasswordManager\Services\RecentActivityService;
 use Models\PasswordManager\Services\UserService;
 use Zephyrus\Core\Session;
 use Zephyrus\Network\Response;
@@ -17,15 +20,17 @@ class Dashboard extends SecureController
     private PasswordService $passwordService;
     private PasswordSharingService $sharingService;
     private UserService $userService;
+    private RecentActivityService $activityService;
 
     public function __construct()
     {
         $this->passwordService = new PasswordService();
         $this->sharingService = new PasswordSharingService();
         $this->userService = new UserService();
+        $this->activityService = new RecentActivityService();
     }
 
-    #[Get('/dashboard')]
+    #[Get("/dashboard")]
     public function dashboard(): Response
     {
         if (Session::get('messages_displayed', false)) {
@@ -40,6 +45,7 @@ class Dashboard extends SecureController
         $sharedByMe = $this->sharingService->getPasswordShared();
         $revealedPasswordIds = Session::get('revealed_password_ids', []);
         $revealedSharedIds = Session::get('revealed_shared_ids', []);
+        $recentActivities = $this->activityService->getRecentActivities($user->id);
 
         $errors = Session::get('errors', []);
         $success = Session::get('success', null);
@@ -64,7 +70,8 @@ class Dashboard extends SecureController
             'errors' => $errors,
             'success' => $success,
             'encryptionService' => new \Models\PasswordManager\Services\EncryptionService(),
-            'userService' => $this->userService
+            'userService' => $this->userService,
+            'recentActivities' => $recentActivities
         ]);
     }
 
@@ -215,5 +222,56 @@ class Dashboard extends SecureController
         }
         Session::set('revealed_shared_ids', $revealedSharedIds);
         return $this->redirect('/dashboard');
+    }
+
+    #[Get('/dashboard/generate-password')]
+    public function generatePassword(): Response
+    {
+        try {
+            $password = EncryptionService::generateCompliantPassword();
+            return $this->json(['password' => $password]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    #[Get('/dashboard/security-check')]
+    public function securityCheck(): Response
+    {
+        try {
+            $user = $this->getUser();
+            $passwords = $this->passwordService->getAllPasswordsWithStrength($user->id);
+            return $this->json(['passwords' => $passwords]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    #[Get('/dashboard/security-alerts')]
+    public function securityAlerts(): Response
+    {
+        try {
+            $user = $this->getUser();
+            $passwords = $this->passwordService->getAllPasswords($user->id);
+            $breachResults = [];
+
+            foreach ($passwords as $password) {
+                $decryptedPassword = $password->password;
+
+                $breachCount = PwnedApiService::findBreachCount($decryptedPassword);
+
+                if ($breachCount > 0) {
+                    $breachResults[] = [
+                        'service_name' => $password->service_name,
+                        'username' => $password->username,
+                        'breach_count' => $breachCount
+                    ];
+                }
+            }
+
+            return $this->json(['breaches' => $breachResults]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

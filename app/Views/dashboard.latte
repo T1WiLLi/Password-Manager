@@ -69,7 +69,6 @@
         </div>
 
         <div class="row g-4 mt-4 align-items-stretch">
-            <!-- Quick Actions Card -->
             <div class="col-md-6">
                 <div class="card h-100">
                     <div class="card-header">
@@ -78,15 +77,15 @@
                     <div class="card-body">
                         <div class="row g-3">
                             {foreach [
-                                ['icon' => 'plus-lg', 'label' => 'Add Password', 'bg' => 'primary'],
-                                ['icon' => 'shield-check', 'label' => 'Security Check', 'bg' => 'success'],
-                                ['icon' => 'share', 'label' => 'Share', 'bg' => 'info'],
-                                ['icon' => 'folder-plus', 'label' => 'Create Group', 'bg' => 'secondary'],
-                                ['icon' => 'key', 'label' => 'Password Generator', 'bg' => 'warning'],
-                                ['icon' => 'exclamation-triangle', 'label' => 'Security Alerts', 'bg' => 'danger'],
+                                ['icon' => 'plus-lg', 'label' => 'Add Password', 'bg' => 'primary', 'data-action' => 'add-password'],
+                                ['icon' => 'shield-check', 'label' => 'Security Check', 'bg' => 'success', 'data-action' => 'security-check'],
+                                ['icon' => 'share', 'label' => 'Share', 'bg' => 'info', 'data-action' => 'share-password'],
+                                ['icon' => 'folder-plus', 'label' => 'Create Group', 'bg' => 'secondary', 'data-action' => 'create-group'],
+                                ['icon' => 'key', 'label' => 'Password Generator', 'bg' => 'warning', 'data-action' => 'generate-password'],
+                                ['icon' => 'exclamation-triangle', 'label' => 'Security Alerts', 'bg' => 'danger', 'data-action' => 'security-alerts'],
                             ] as $action}
                                 <div class="col-6">
-                                    <div class="action-item d-flex align-items-center p-2 rounded hover-glow transition" data-action="{strtolower(str_replace(' ', '-', $action['label']))}">
+                                    <div class="action-item d-flex align-items-center p-2 rounded hover-glow transition" data-action="{$action['data-action']}">
                                         <div class="action-icon bg-{$action['bg']} rounded-circle text-white p-2 me-3 d-flex align-items-center justify-content-center">
                                             <i class="bi bi-{$action['icon']}"></i>
                                         </div>
@@ -142,7 +141,79 @@
             </div>
         </div>
 
-        <!-- Recent Activity Card - Now part of the main structure -->
+        <div class="modal fade" id="securityCheckModal" tabindex="-1" aria-labelledby="securityCheckModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="securityCheckModalLabel">Security Check</h5>
+                        <button type="button" class="btn-close btn-effects" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="securityCheckLoading" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Checking password strength...</p>
+                        </div>
+                        <div id="securityCheckResults" style="display: none;">
+                            <h6>Password Strength Summary</h6>
+                            <ul class="list-group"></ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-effects btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="securityAlertsModal" tabindex="-1" aria-labelledby="securityAlertsModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="securityAlertsModalLabel">Security Alerts</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="securityAlertsLoading" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p>Checking for breached passwords...</p>
+                        </div>
+                        <div id="securityAlertsResults" style="display: none;">
+                            <h6>Breached Passwords</h6>
+                            <ul class="list-group" id="breachList"></ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="generatePasswordModal" tabindex="-1" aria-labelledby="generatePasswordModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="generatePasswordModalLabel">Generated Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Your generated password is:</p>
+                        <div class="alert alert-info text-center" id="generatedPasswordText">
+                            Loading...
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex flex-row justify-content-start">
+                        <button type="button" class="btn btn-effects btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-effects btn-primary" id="useGeneratedPassword">Generate Password from This</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4 mt-4">
             <div class="col-12">
                 <div class="card">
@@ -151,58 +222,27 @@
                         <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
                     </div>
                     <div class="card-body p-0">
-                        <div class="activity-timeline p-3">
-                            <div class="activity-item d-flex pb-3 mb-3 border-bottom">
-                                <div class="activity-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
-                                    <i class="bi bi-key-fill"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="mb-1">Password Updated</h6>
-                                        <span class="text-muted small">Today, 10:42 AM</span>
+                       <div class="activity-timeline p-3 pb-0">
+                            {foreach $recentActivities as $activity}
+                                <div class="activity-item d-flex pb-3 mb-3 {if !$iterator->last}border-bottom{/if}">
+                                    <div class="activity-icon bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
+                                        <i class="bi {$activity->icon->value}"></i>
                                     </div>
-                                    <p class="mb-0 text-muted">You updated your Netflix password</p>
-                                </div>
-                            </div>
-                            
-                            <div class="activity-item d-flex pb-3 mb-3 border-bottom">
-                                <div class="activity-icon bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
-                                    <i class="bi bi-shield-check"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="mb-1">Security Check Completed</h6>
-                                        <span class="text-muted small">Yesterday, 3:15 PM</span>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-1">{$activity->title}</h6>
+                                            <span class="text-muted small">{$activity->date}</span>
+                                        </div>
+                                        <p class="mb-0 text-muted">{$activity->description}</p>
                                     </div>
-                                    <p class="mb-0 text-muted">Automatic security check completed</p>
                                 </div>
-                            </div>
-                            
-                            <div class="activity-item d-flex pb-3 mb-3 border-bottom">
-                                <div class="activity-icon bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
-                                    <i class="bi bi-share"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="mb-1">Password Shared</h6>
-                                        <span class="text-muted small">Apr 3, 11:20 AM</span>
+                            {else}
+                                <div class="activity-item d-flex pb-3 mb-3">
+                                    <div class="flex-grow-1">
+                                        <p class="mb-0 text-muted">No recent activities found.</p>
                                     </div>
-                                    <p class="mb-0 text-muted">You shared "Wifi Password" with Alex</p>
                                 </div>
-                            </div>
-                            
-                            <div class="activity-item d-flex">
-                                <div class="activity-icon bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">
-                                    <i class="bi bi-person-plus"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="mb-1">New Device Login</h6>
-                                        <span class="text-muted small">Apr 2, 8:55 PM</span>
-                                    </div>
-                                    <p class="mb-0 text-muted">New login from iPhone 13 in San Francisco</p>
-                                </div>
-                            </div>
+                            {/foreach}
                         </div>
                     </div>
                 </div>

@@ -43,7 +43,7 @@ class AuthController extends Controller
             $form->addFields([
                 'ipAddress' => $_SERVER['REMOTE_ADDR'],
                 'userAgent' => $_SERVER['HTTP_USER_AGENT'],
-                'location' => null // Use a geolocation service to get the user's location
+                'location' => "Sorel-Tracy"
             ]);
             $user = $this->authService->login($form);
 

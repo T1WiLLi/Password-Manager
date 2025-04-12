@@ -79,7 +79,7 @@ class EncryptionService
         $lower = Cryptography::randomString(1, range('a', 'z'));
         $number = Cryptography::randomString(1, range('0', '9'));
         $special = Cryptography::randomString(1, '!@#$%^&*()-_=+[]{}|;:,.<>?');
-        $remaining = Cryptography::randomString($length - 8);
+        $remaining = Cryptography::randomString($length - 4);
 
         $password = str_shuffle($upper . $lower . $number . $special . $remaining);
         return $password;
