@@ -33,12 +33,11 @@ class SmsMFA
         return str_pad($code, 6, '0', STR_PAD_LEFT);
     }
 
-    public function sendCode(string $phoneNumber): string
+    public function sendCode(string $phoneNumber, string $code): string
     {
         try {
-            $code = $this->generateCode();
             $message = $this->twilio->messages->create(
-                $phoneNumber, // to
+                (str_starts_with($phoneNumber, '+1') ? $phoneNumber : '+1' . $phoneNumber), // to
                 [
                     "from" => $this->fromNumber,
                     "body" => "Your one-time MFA code is: $code\nThis code will expire in 10 minutes."

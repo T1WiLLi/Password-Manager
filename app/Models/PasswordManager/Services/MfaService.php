@@ -127,8 +127,8 @@ class MfaService
         }
         $code = $this->smsMfa->generateCode();
         $this->storeSessionCode($userId, self::TYPE_SMS, $code);
-        $this->smsMfa->sendCode($user->phone_number);
-        return true;
+        $sentCode = $this->smsMfa->sendCode($user->phone_number, $code);
+        return $sentCode === $code;
     }
 
     public function verifySmsMfaCode(int $userId, string $code): bool

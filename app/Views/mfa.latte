@@ -1,0 +1,87 @@
+{extends "layouts/main.latte"}
+
+{block content}
+<div class="container py-5">
+  <h2 class="mb-4">{$title}</h2>
+
+  {if $success}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {$success}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {/if}
+  {if !empty($errors)}
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {$errors}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+  {/if}
+
+  <div class="row g-4">
+    {foreach $methods as $m}
+      <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header text-center text-capitalize">
+            <strong>{$m}</strong>
+          </div>
+          <div class="card-body d-flex flex-column">
+            {if in_array($m, $verified)}
+              <div class="alert alert-success text-center mb-3">
+                Verified
+              </div>
+            {/if}
+
+            {if $m === 'authenticator'}
+              <div class="text-center mb-3">
+                <img src="/mfa/qrcode"
+                     alt="QR Code"
+                     class="img-fluid rounded"
+                     style="max-width:200px;">
+                <p class="small text-muted mt-2">
+                  Scan with Google Authenticator
+                </p>
+              </div>
+            {/if}
+
+            {if $m !== 'authenticator' && !in_array($m, $verified)}
+              <form method="POST" action="/mfa" class="mb-3">
+                <input type="hidden" name="method_type" value="{$m}">
+                <button
+                  type="submit"
+                  name="action"
+                  value="send"
+                  class="btn btn-outline-primary w-100"
+                >Send Code</button>
+              </form>
+            {/if}
+
+            {if !in_array($m, $verified)}
+              <form method="POST" action="/mfa" class="mt-auto">
+                <input type="hidden" name="method_type" value="{$m}">
+                <div class="mb-3">
+                  <label for="code-{$m}" class="form-label">Code</label>
+                  <input
+                    type="text"
+                    id="code-{$m}"
+                    name="code"
+                    class="form-control"
+                    placeholder="123456"
+                    required
+                  >
+                </div>
+                <button
+                  type="submit"
+                  name="action"
+                  value="verify"
+                  class="btn btn-primary w-100"
+                >Verify</button>
+              </form>
+            {/if}
+
+          </div>
+        </div>
+      </div>
+    {/foreach}
+  </div>
+</div>
+{/block}
