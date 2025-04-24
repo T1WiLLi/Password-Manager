@@ -4,6 +4,7 @@ namespace Controllers\Home;
 
 use Controllers\SecureController;
 use Models\Exceptions\FormException;
+use Models\PasswordManager\Services\MfaService;
 use Models\PasswordManager\Services\UserService;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router\Get;
@@ -13,20 +14,48 @@ use Zephyrus\Security\Cryptography;
 class ProfileController extends SecureController
 {
     private UserService $userService;
+    private MfaService $mfaService;
 
     public function __construct()
     {
         $this->userService = new UserService();
+        $this->mfaService = new MfaService();
     }
 
     #[Get('/profile')]
     public function profile(): Response
     {
+        $user = $this->getUser();
+        $mfa  = $this->buildMfaData($user->id);
+
         return $this->render('profile', [
             'title' => 'Profile',
-            'user' => $this->getUser(),
+            'user' => $user,
             'errors' => [],
-            'success' => null
+            'success' => null,
+            'mfa' => $mfa
+        ]);
+    }
+
+    #[Post('/profile/update-mfa')]
+    public function updateMfa(): Response
+    {
+        $form = $this->buildForm();
+        $user = $this->getUser();
+        $methodType = $form->getValue('method_type');
+        $enable = (bool)$form->getValue('enable');
+
+        $this->mfaService->setMethodEnabled($user->id, $methodType, $enable);
+
+        $mfa = $this->buildMfaData($user->id);
+        $message = ucfirst($methodType) . ' MFA ' . ($enable ? 'enabled' : 'disabled') . '!';
+
+        return $this->render('profile', [
+            'title' => 'Profile',
+            'user' => $user,
+            'errors' => [],
+            'success' => $message,
+            'mfa' => $mfa
         ]);
     }
 
@@ -114,5 +143,23 @@ class ProfileController extends SecureController
                 'success' => null
             ]);
         }
+    }
+
+    private function buildMfaData(int $userId): array
+    {
+        return [
+            'email' => [
+                'enabled' => $this->mfaService->isMethodEnabled($userId, MfaService::TYPE_EMAIL),
+                'lastVerification' => $this->mfaService->getLastVerification($userId, MfaService::TYPE_EMAIL),
+            ],
+            'sms' => [
+                'enabled'          => $this->mfaService->isMethodEnabled($userId, MfaService::TYPE_SMS),
+                'lastVerification' => $this->mfaService->getLastVerification($userId, MfaService::TYPE_SMS),
+            ],
+            'authenticator' => [
+                'enabled'          => $this->mfaService->isMethodEnabled($userId, MfaService::TYPE_AUTHENTICATOR),
+                'lastVerification' => $this->mfaService->getLastVerification($userId, MfaService::TYPE_AUTHENTICATOR),
+            ],
+        ];
     }
 }

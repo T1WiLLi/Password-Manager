@@ -70,24 +70,42 @@ abstract class Controller extends BaseController
     protected function setupSecurityHeaders(SecureHeader $secureHeader): void
     {
         $csp = new ContentSecurityPolicy();
-        $csp->setFontSources(["'self'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com']);
-        $csp->setStyleSources(["'self'", 'https://fonts.googleapis.com', ContentSecurityPolicy::UNSAFE_INLINE]);
+
+        $csp->setFontSources([
+            ContentSecurityPolicy::SELF,
+            'https://fonts.googleapis.com',
+            'https://fonts.gstatic.com'
+        ]);
+        $csp->setStyleSources([
+            ContentSecurityPolicy::SELF,
+            'https://fonts.googleapis.com',
+            ContentSecurityPolicy::UNSAFE_INLINE
+        ]);
+
         $csp->setScriptSources([
-            "'self'",
+            ContentSecurityPolicy::SELF,
             'https://ajax.googleapis.com',
             'https://maps.googleapis.com',
             'https://www.google-analytics.com',
             'https://cdn.jsdelivr.net'
         ]);
-        $csp->setChildSources(["'self'"]);
-        $csp->setWorkerSources(["blob:"]);
-        $csp->setConnectSources(["'self'", 'https://api.mapbox.com', 'https://events.mapbox.com']);
 
-        // Allow Google authenticator image generation
-        $csp->setImageSources(["'self'", 'blob:', 'data:', 'https://chart.googleapis.com', 'https://api.qrserver.com']);
+        $csp->setChildSources([ContentSecurityPolicy::SELF]);
+        $csp->setWorkerSources([ContentSecurityPolicy::BLOB]);
+        $csp->setConnectSources([
+            ContentSecurityPolicy::SELF,
+            'https://api.mapbox.com',
+            'https://events.mapbox.com'
+        ]);
+        $csp->setImageSources([
+            ContentSecurityPolicy::SELF,
+            ContentSecurityPolicy::BLOB,
+            ContentSecurityPolicy::BASE64,
+            'https://chart.googleapis.com',
+            'https://api.qrserver.com'
+        ]);
         $csp->setBaseUri([$this->request->getUrl()->getBaseUrl()]);
 
-        // Add custom CSP
         $secureHeader->setContentSecurityPolicy($csp);
     }
 

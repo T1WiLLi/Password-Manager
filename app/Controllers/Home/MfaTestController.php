@@ -5,6 +5,7 @@ namespace Controllers\Home;
 use Controllers\Controller;
 use Models\PasswordManager\mfa\EmailMFA;
 use Models\PasswordManager\mfa\SmsMFA;
+use Models\PasswordManager\mfa\Authentificator;
 use Zephyrus\Application\Mailer\Mailer;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router\Get;
@@ -14,33 +15,36 @@ class MfaTestController extends Controller
 {
     private EmailMFA $emailMfa;
     private SmsMFA $smsMfa;
+    private Authentificator $authenticator;
 
     public function __construct()
     {
-        $this->emailMfa = new EmailMFA();
-        $this->smsMfa = new SmsMFA();
+        $this->emailMfa      = new EmailMFA();
+        $this->smsMfa        = new SmsMFA();
+        $this->authenticator = new Authentificator();
 
-        // Ensure session is started
-        if (session_status() == PHP_SESSION_NONE) {
+        if (session_status() === PHP_SESSION_NONE) {
             session_start();
+        }
+
+        // Ensure we have a per‑session TOTP secret
+        if (empty($_SESSION['mfa_auth_secret'])) {
+            $_SESSION['mfa_auth_secret'] = $this->authenticator->generateSecret();
         }
     }
 
     #[Get("/mfa-test")]
     public function index(): Response
     {
-        // Get any messages from the session and clear them
-        $successMessage = $_SESSION['mfa_success_message'] ?? '';
-        $errorMessage = $_SESSION['mfa_error_message'] ?? '';
-
-        // Clear session messages after reading them
-        unset($_SESSION['mfa_success_message']);
-        unset($_SESSION['mfa_error_message']);
+        // flash messages
+        $success = $_SESSION['mfa_success_message'] ?? '';
+        $error   = $_SESSION['mfa_error_message']   ?? '';
+        unset($_SESSION['mfa_success_message'], $_SESSION['mfa_error_message']);
 
         return $this->render('mfa_test', [
-            'title' => 'Test MFA Services',
-            'successMessage' => $successMessage,
-            'errorMessage' => $errorMessage
+            'title'          => 'Test MFA Services',
+            'successMessage' => $success,
+            'errorMessage'   => $error
         ]);
     }
 
@@ -48,39 +52,54 @@ class MfaTestController extends Controller
     public function send(): Response
     {
         $form = $this->buildForm();
-        $form->verify('service', fn($value) => in_array($value, ['email', 'sms']), 'Invalid service selected');
-        $form->verify('recipient', fn($value) => !empty($value), 'Recipient is required');
+        $form->verify('service', fn($v) => in_array($v, ['email', 'sms', 'authenticator']), 'Invalid service');
+        if (in_array($form->getValue('service'), ['email', 'sms'])) {
+            $form->verify('recipient', fn($v) => !empty($v), 'Recipient is required');
+        }
+        if ($form->getValue('service') === 'authenticator') {
+            $form->verify('code', fn($v) => preg_match('/^\d{6}$/', $v), 'Enter a 6‑digit code');
+        }
 
         if ($form->hasError()) {
             $_SESSION['mfa_error_message'] = implode('<br>', $form->getErrorMessages());
             return $this->redirect('/mfa-test');
         }
 
-        $service = $form->getValue('service');
-        $recipient = $form->getValue('recipient');
-        $useGeneratedCode = $form->getValue('use_generated_code') === 'on';
-        $customBody = $form->getValue('custom_body');
+        $svc = $form->getValue('service');
+        $rcp = $form->getValue('recipient');
 
         try {
-            if ($useGeneratedCode) {
-                $code = $service === 'email' ? $this->emailMfa->generateCode() : $this->smsMfa->generateCode();
-                $success = $this->sendMfaCode($service, $recipient, $code);
-                if ($success) {
-                    $_SESSION['mfa_success_message'] = "MFA code ($code) sent successfully to $recipient via $service.";
-                } else {
-                    $_SESSION['mfa_error_message'] = "Failed to send MFA code to $recipient via $service.";
-                }
+            if ($svc === 'authenticator') {
+                // verify TOTP
+                $ok = $this->authenticator->verifyCode(
+                    $_SESSION['mfa_auth_secret'],
+                    $form->getValue('code')
+                );
+                $_SESSION[$ok ? 'mfa_success_message' : 'mfa_error_message']
+                    = $ok
+                    ? '✔️ Authenticator code is valid!'
+                    : '❌ Invalid authenticator code.';
+            } elseif ($form->getValue('use_generated_code') === 'on') {
+                // email or SMS with generated code
+                $code = $svc === 'email'
+                    ? $this->emailMfa->generateCode()
+                    : $this->smsMfa->generateCode();
+                $sent = $this->sendMfaCode($svc, $rcp, $code);
+                $_SESSION[$sent ? 'mfa_success_message' : 'mfa_error_message']
+                    = $sent
+                    ? "MFA code ($code) sent to $rcp via $svc."
+                    : "Failed to send MFA code to $rcp via $svc.";
             } else {
-                if (empty($customBody)) {
-                    $_SESSION['mfa_error_message'] = "Custom body is required if not using a generated code.";
-                    return $this->redirect('/mfa-test');
+                // custom body
+                $body = $form->getValue('custom_body');
+                if (empty($body)) {
+                    throw new \Exception("Custom body is required if not using generated code");
                 }
-                $success = $this->sendCustomMessage($service, $recipient, $customBody);
-                if ($success) {
-                    $_SESSION['mfa_success_message'] = "Custom message sent successfully to $recipient via $service.";
-                } else {
-                    $_SESSION['mfa_error_message'] = "Failed to send custom message to $recipient via $service.";
-                }
+                $ok = $this->sendCustomMessage($svc, $rcp, $body);
+                $_SESSION[$ok ? 'mfa_success_message' : 'mfa_error_message']
+                    = $ok
+                    ? "Custom message sent to $rcp via $svc."
+                    : "Failed to send custom message to $rcp via $svc.";
             }
         } catch (\Exception $e) {
             $_SESSION['mfa_error_message'] = "Error: " . $e->getMessage();
@@ -90,60 +109,73 @@ class MfaTestController extends Controller
     }
 
     /**
-     * Sends an MFA code using the specified service.
-     *
-     * @param string $service The service to use ('email' or 'sms').
-     * @param string $recipient The recipient (email address or phone number).
-     * @param string $code The MFA code to send.
-     * @return bool True if sent successfully, false otherwise.
+     * Endpoint to return a tiny HTML snippet with the QR <img>.
      */
-    private function sendMfaCode(string $service, string $recipient, string $code): bool
+    #[Get("/verify/qrcode")]
+    public function getQrCode(): Response
     {
-        if ($service === 'email') {
-            return $this->emailMfa->sendCode($recipient, $code);
-        } elseif ($service === 'sms') {
-            $sentCode = $this->smsMfa->sendCode($recipient);
-            return $sentCode === $code;
-        }
-        return false;
+        $secret = $_SESSION['mfa_auth_secret']
+            ?? $_SESSION['mfa_auth_secret'] = $this->authenticator->generateSecret();
+
+        $dataUri = $this->authenticator->getQRCodeInline(
+            "TiWill",
+            $secret
+        );
+
+        $html = '
+        <div class="qr-code-image text-center">
+            <img src="' . htmlspecialchars($dataUri, ENT_QUOTES) . '"
+                 alt="QR Code To Scan"
+                 class="img-fluid rounded shadow"
+                 style="max-width:250px;">
+        </div>';
+
+        $resp = new Response();
+        $resp->setContent($html);
+        return $resp;
     }
 
-    private function sendCustomMessage(string $service, string $recipient, string $customBody): bool
+    private function sendMfaCode(string $svc, string $to, string $code): bool
     {
-        if ($service === 'email') {
+        if ($svc === 'email') {
+            return $this->emailMfa->sendCode($to, $code);
+        }
+        $sent = $this->smsMfa->sendCode($to);
+        return $sent === $code;
+    }
+
+    private function sendCustomMessage(string $svc, string $to, string $body): bool
+    {
+        if ($svc === 'email') {
             try {
                 $mailer = new Mailer(null);
-                $mailer->setFrom(config('mailer', "from_address"), config('mailer', "from_name"));
+                $mailer->setFrom(config('mailer', 'from_address'), config('mailer', 'from_name'));
                 $mailer->setSubject('Custom MFA Message');
-                $mailer->setBody($customBody, strip_tags($customBody));
-                $mailer->addRecipient($recipient);
+                $mailer->setBody($body, strip_tags($body));
+                $mailer->addRecipient($to);
                 $mailer->send();
                 return true;
             } catch (\Exception $e) {
-                error_log("Failed to send custom email: " . $e->getMessage());
+                error_log($e->getMessage());
                 return false;
             } finally {
                 $mailer->clearRecipients();
             }
-        } elseif ($service === 'sms') {
-            try {
-                $twilio = new \Twilio\Rest\Client(
-                    config('twilio', "account_sid"),
-                    config('twilio', "auth_token")
-                );
-                $twilio->messages->create(
-                    $recipient,
-                    [
-                        "from" => config('twilio', "from_number"),
-                        "body" => $customBody
-                    ]
-                );
-                return true;
-            } catch (\Twilio\Exceptions\TwilioException $e) {
-                error_log("Failed to send custom SMS: " . $e->getMessage());
-                return false;
-            }
         }
-        return false;
+
+        try {
+            $tw = new \Twilio\Rest\Client(
+                config('twilio', 'account_sid'),
+                config('twilio', 'auth_token')
+            );
+            $tw->messages->create($to, [
+                'from' => config('twilio', 'from_number'),
+                'body' => $body
+            ]);
+            return true;
+        } catch (\Twilio\Exceptions\TwilioException $e) {
+            error_log($e->getMessage());
+            return false;
+        }
     }
 }
