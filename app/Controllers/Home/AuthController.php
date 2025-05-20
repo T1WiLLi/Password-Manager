@@ -124,20 +124,6 @@ class AuthController extends Controller
         ]);
     }
 
-    #[Get('/mfa/qrcode')]
-    public function mfaQrCode(): Response
-    {
-        $userId = Session::get('pending_mfa_user') ?? null;
-        if (!$userId) {
-            return $this->redirect('/login');
-        }
-        $qr = $this->mfaService->getAuthenticatorQrCode($userId);
-        return new Response($qr, 200, [
-            'Content-Type' => 'text/plain'
-        ]);
-    }
-
-
     #[Post('/mfa')]
     public function mfa(): Response
     {

@@ -4,8 +4,10 @@ namespace Controllers\Home;
 
 use Controllers\SecureController;
 use Models\Exceptions\FormException;
+use Models\PasswordManager\Services\EncryptionService;
 use Models\PasswordManager\Services\MfaService;
 use Models\PasswordManager\Services\UserService;
+use Zephyrus\Core\Session;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router\Get;
 use Zephyrus\Network\Router\Post;
@@ -147,12 +149,12 @@ class ProfileController extends SecureController
 
     private function buildMfaData(int $userId): array
     {
-        return [
-            'email' => [
-                'enabled' => $this->mfaService->isMethodEnabled($userId, MfaService::TYPE_EMAIL),
+        $data = [
+            'email'         => [
+                'enabled'          => $this->mfaService->isMethodEnabled($userId, MfaService::TYPE_EMAIL),
                 'lastVerification' => $this->mfaService->getLastVerification($userId, MfaService::TYPE_EMAIL),
             ],
-            'sms' => [
+            'sms'           => [
                 'enabled'          => $this->mfaService->isMethodEnabled($userId, MfaService::TYPE_SMS),
                 'lastVerification' => $this->mfaService->getLastVerification($userId, MfaService::TYPE_SMS),
             ],
@@ -161,5 +163,24 @@ class ProfileController extends SecureController
                 'lastVerification' => $this->mfaService->getLastVerification($userId, MfaService::TYPE_AUTHENTICATOR),
             ],
         ];
+
+        return $data;
+    }
+
+    #[Get('/mfa/qrcode')]
+    public function getQrCode(): Response
+    {
+        $userId = EncryptionService::getUserIDFromSession();
+        $dataUri = $this->mfaService->getAuthenticatorQrCode($userId);
+
+        $html = '
+        <div class="text-center">
+            <img src="' . htmlspecialchars($dataUri) . '" alt="QR Code To Scan" class="img-fluid rounded shadow" style="max-width: 250px;">
+        </div>
+        ';
+
+        $response = new Response();
+        $response->setContent($html);
+        return $response;
     }
 }
